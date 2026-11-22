@@ -251,6 +251,13 @@ const Calc = {
   schofield(w, y, male) { const t = y < 3 ? 0 : y < 10 ? 1 : 2;
     return (male ? [59.512 * w - 30.4, 22.706 * w + 504.3, 17.686 * w + 658.2] : [58.317 * w - 31.1, 20.315 * w + 485.9, 13.384 * w + 692.6])[t]; },
   caldwell: (w, y) => 22 + 31.05 * w + 1.16 * y,
+  // RDA kcal/kg menurut umur (NRC 1989, dikutip buku ajar anak Indonesia). Umur ≥ 11 th perlu L/P.
+  rda(m, male) {
+    if (m < 6) return [108, "0–6 bulan"]; if (m < 12) return [98, "6–12 bulan"]; if (m < 48) return [102, "1–3 tahun"];
+    if (m < 84) return [90, "4–6 tahun"]; if (m < 132) return [70, "7–10 tahun"];
+    if (male == null) return null;
+    if (m < 180) return [male ? 55 : 47, `11–14 tahun ${male ? "L" : "P"}`];
+    return [male ? 45 : 40, `15–18 tahun ${male ? "L" : "P"}`]; },
   iwlRate: (m, neo) => neo ? 50 : m <= 12 ? 40 : m <= 60 ? 30 : 20,
   iwlLabel: (m, neo) => neo ? "neonatus" : m <= 12 ? "1–12 bulan" : m <= 60 ? "> 1–5 tahun" : "> 5 tahun",
   balance(i, u, o, h, w, m, neo) { if (!(h > 0 && w > 0)) return null;
@@ -345,7 +352,7 @@ const INTERP = {
 /* ============ data pasien ============ */
 const blank = () => ({ isDemo: false, weight: "", ageYears: "", ageMonths: "", male: null, neonate: false, spo2Low: "", spo2High: "",
   hr: "", rr: "", sbp: "", dbp: "", spo2: "", temp: "", crt: "", pat: [null, null, null],
-  intakePerHour: "", rda: "", balIntake: "", balUrine: "", balOther: "", balHours: "",
+  intakePerHour: "", rda: "", bbIdeal: "", balIntake: "", balUrine: "", balOther: "", balHours: "",
   gcsPreverbal: true, gcs: [null, null, null], comfortVent: false, comfort: Array(6).fill(null), four: Array(4).fill(null),
   flacc: Array(5).fill(null), cheops: Array(6).fill(null), nips: Array(6).fill(null), cries: Array(5).fill(null),
   cpotInt: false, cpot: Array(4).fill(null), nrs: null,
@@ -377,6 +384,11 @@ const D = {
   level() { const v = D.vitals(); if (!v.length && p.pat.every(x => x === null)) return -1;
     const worst = Math.max(0, ...v.map(x => x.z)); return Math.max(worst === 3 ? 3 : worst === 1 ? 1 : 0, D.patLevel()); },
   action: l => l === -1 ? "Isi TTV dan/atau PAT untuk menilai status" : l === 0 ? "Observasi rutin sesuai jadwal" : Calc.esc[l],
+  rdaAuto: () => { const m = D.tm(); return m == null ? null : Calc.rda(m, p.male); },
+  bbi: () => { const v = parse(p.bbIdeal); return v != null && v >= .3 && v <= 150 ? v : null; },
+  rdaCalc() { const w = D.w(); if (w == null) return null; const man = parse(p.rda), auto = D.rdaAuto();
+    const perKg = man ?? auto?.[0]; if (perKg == null) return null; const bbi = D.bbi(), base = bbi ?? w;
+    return { perKg, src: man != null ? "diisi manual" : `otomatis ${auto[1]}`, base, baseLabel: bbi != null ? "BB ideal" : "BB aktual", kcal: perKg * base }; },
   total: a => a.includes(null) ? null : a.reduce((x, y) => x + y, 0),
   cheopsTotal: () => p.cheops.includes(null) ? null : S.cheops().reduce((s, it, i) => s + it.opts[p.cheops[i]][0], 0),
   bal() { const w = D.w(), m = D.tm(), i = parse(p.balIntake), h = parse(p.balHours);
@@ -404,7 +416,7 @@ const LV = { "-1": "var(--gray)", 0: "var(--green)", 1: "var(--yellow)", 2: "var
 const ST = { ok: "var(--green)", warn: "var(--yellow)", alert: "var(--red)", info: "var(--blue)" };
 const lvSt = l => l >= 2 ? "alert" : l === 1 ? "warn" : "ok";
 const res = (l, v, st = "info") => `<div class="res${String(v).length > 34 ? " long" : ""}" style="--c:${ST[st]}"><span class="dot"></span><span class="l">${esc(l)}</span><span class="v">${esc(v)}</span></div>`;
-const field = (k, label, unit, zone) => `<div class="f"><label>${label}</label><div class="inp" ${zone ? `data-zone="${zone}"` : ""}><input data-k="${k}" inputmode="decimal" placeholder="–" value="${esc(p[k])}"><small>${unit}</small></div></div>`;
+const field = (k, label, unit, zone, ph = "–") => `<div class="f"><label>${label}</label><div class="inp" ${zone ? `data-zone="${zone}"` : ""}><input data-k="${k}" inputmode="decimal" placeholder="${esc(ph)}" value="${esc(p[k])}"><small>${unit}</small></div></div>`;
 const seg = (k, opts) => `<div class="seg full">${opts.map(([v, t]) => `<button data-seg="${k}" data-v="${v}" class="${p[k] === v ? "on" : ""}">${t}</button>`).join("")}</div>`;
 const card = (key, title, sub, color, body) => `<div class="ch" style="--c:${color}"><div class="ic">${svg(key)}</div><div><b style="color:${color}">${title}</b><span>${sub}</span></div></div><div class="stack">${body}<div id="res" class="stack"></div></div>`;
 const scoreRows = (key, items, choice) => items.map((it, i) => {
@@ -419,12 +431,18 @@ const incomplete = a => res("Total", `Belum lengkap (${a.filter(x => x != null).
 /* ============ bagian (fitur) ============ */
 const SEC = {
   kebutuhan: { t: "HS & Kalori", c: "var(--teal)", g: "Cairan",
-    body: () => card("kebutuhan", "Kebutuhan cairan & kalori", "Blok Requirements & Plan kardeks", "var(--teal)", field("rda", "RDA (sesuai umur)", "kcal/kg")),
+    body: () => { const a = D.rdaAuto();
+      return card("kebutuhan", "Kebutuhan cairan & kalori", "Blok Requirements & Plan kardeks", "var(--teal)",
+        `<div class="row">${field("rda", "RDA (kosong = otomatis)", "kcal/kg", null, a ? `${a[0]} oto` : "–")}${field("bbIdeal", "BB ideal (opsional)", "kg")}</div>`); },
     res() { const w = D.w(), y = D.years(), m = D.tm(); if (w == null) return `<p class="note">Isi berat badan & umur di bagian atas.</p>`;
       const hs = Calc.hs(w); let h = res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
       h += res("Schofield", y != null && p.male != null ? `${id(Calc.schofield(w, y, p.male), 0)} kcal` : "isi umur & L/P");
       h += res("Caldwell-Kennedy (REE)", y != null ? `${id(Calc.caldwell(w, y), 0)} kcal` : "isi umur");
-      const r = parse(p.rda); if (r) h += res("RDA × BB", `${id(r * w, 0)} kcal`);
+      const r = D.rdaCalc();
+      if (r) h += res(`RDA (${r.src}) × ${r.baseLabel}`, `${id(r.perKg, 0)} × ${id(r.base)} kg = ${id(r.kcal, 0)} kcal`);
+      else h += res("RDA × BB", m == null ? "isi umur" : "pilih L/P (umur ≥ 11 th)");
+      if (p.bbIdeal && D.bbi() == null) h += res("BB ideal", "tidak masuk akal — isi dalam kg", "alert");
+      h += `<p class="note">RDA otomatis: tabel RDA (NRC 1989) — cocokkan dengan acuan unit; isi kotak RDA untuk mengganti.</p>`;
       if (m != null) { const n = D.neo(), iwl = Calc.iwlRate(m, n) * w; h += res(`IWL RSSA (${Calc.iwlLabel(m, n)}: ${Calc.iwlRate(m, n)} cc/kg)`, `${id(iwl, 0)} cc/hari · ${id(iwl / 24)} cc/jam`); }
       else h += res("IWL RSSA", "isi umur");
       return h; } },
@@ -505,6 +523,7 @@ const FEAT = [
   ["Holliday-Segar (HS)", "hs maintenance rumatan cairan kalori", "kebutuhan", () => D.w() != null && `${id(Calc.hs(D.w()), 0)} cc/hari · ${id(Calc.hs(D.w()) / 24)} cc/jam`],
   ["Schofield", "schofield kalori kcal energi gizi", "kebutuhan", () => D.w() != null && D.years() != null && p.male != null && `${id(Calc.schofield(D.w(), D.years(), p.male), 0)} kcal`],
   ["Caldwell-Kennedy (REE)", "caldwell cadwell kennedy ree kalori", "kebutuhan", () => D.w() != null && D.years() != null && `${id(Calc.caldwell(D.w(), D.years()), 0)} kcal`],
+  ["RDA × BB", "rda kalori kebutuhan gizi bb ideal", "kebutuhan", () => D.rdaCalc() && `${id(D.rdaCalc().kcal, 0)} kcal`],
   ["IWL", "iwl insensible water loss rssa neonatus", "kebutuhan", () => D.w() != null && D.tm() != null && `${id(Calc.iwlRate(D.tm(), D.neo()) * D.w(), 0)} cc/hari`],
   ["Intake vs maintenance", "intake persen maintenance overload", "intake", () => { const w = D.w(), i = parse(p.intakePerHour); return w != null && i != null && `${id(i / (Calc.hs(w) / 24) * 100, 0)}%`; }],
   ["Balance cairan", "balance kumulatif output iwl", "balance", () => D.bal() && `${signed(D.bal().bal, 1)} cc`],
@@ -554,7 +573,7 @@ function renderAll() { renderPatient(); renderGrid(); renderSection(); }
 document.addEventListener("input", e => {
   const k = e.target.dataset.k; if (!k) return; p[k] = e.target.value;
   // umur/BB mengubah zona & pilihan otomatis di beberapa bagian → render ulang bila bukan kotak di dalam bagian itu
-  if (["weight", "ageYears", "ageMonths"].includes(k) && ["ttv", "gfr", "flacc", "cheops", "nrs", "nips", "cries", "cpot"].includes(cur)) {
+  if (["weight", "ageYears", "ageMonths"].includes(k) && ["kebutuhan", "ttv", "gfr", "flacc", "cheops", "nrs", "nips", "cries", "cpot"].includes(cur)) {
     const sel = e.target.selectionStart; renderSection(); const el = document.querySelector(`[data-k="${k}"]`); el.focus(); el.setSelectionRange?.(sel, sel);
   } else refresh();
 });
@@ -567,7 +586,7 @@ document.addEventListener("change", e => {
 document.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) { $("#menu").classList.remove("show"); return; }
   if (b.dataset.sec) { cur = b.dataset.sec; renderGrid(); renderSection(); }
-  else if (b.dataset.seg) { const k = b.dataset.seg; p[k] = b.dataset.v === "true"; if (k === "male") { renderPatient(); refresh(); } else renderSection(); }
+  else if (b.dataset.seg) { const k = b.dataset.seg; p[k] = b.dataset.v === "true"; if (k === "male") { renderPatient(); renderSection(); } else renderSection(); }
   else if (b.dataset.pat) { const i = +b.dataset.pat; p.pat[i] = p.pat[i] == null ? false : !p.pat[i]; renderSection(); }
   else if (b.dataset.nrs) { const v = +b.dataset.nrs; p.nrs = p.nrs === v ? null : v; renderSection(); }
   if (b.id !== "bMore") $("#menu").classList.remove("show");
