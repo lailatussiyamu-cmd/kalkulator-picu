@@ -6,176 +6,181 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kalkulator PICU">
-<meta name="theme-color" content="#eef3fb" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0b0f1a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F9B2CC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#7A3F72" media="(prefers-color-scheme: dark)">
 <title>Kalkulator PICU</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <style>
+/* ===== tema clay pastel (krem · pink · lavender · mint · butter) ===== */
 :root{
-  --blue:#007AFF; --teal:#30B0C7; --indigo:#5856D6; --purple:#AF52DE; --pink:#FF2D55;
-  --green:#34C759; --yellow:#FFCC00; --orange:#FF9500; --red:#FF3B30; --mint:#00C7BE; --brown:#A2845E; --cyan:#32ADE6; --gray:#8E8E93;
-  --text:#1c1c1e; --text2:rgba(60,60,67,.62);
-  --glass:rgba(255,255,255,.52); --glass2:rgba(255,255,255,.34); --stroke:rgba(255,255,255,.75); --hair:rgba(0,0,0,.06);
-  --field:rgba(118,118,128,.10); --shadow:0 10px 30px rgba(20,40,90,.10), 0 1px 2px rgba(20,40,90,.06);
-  --bg1:#dfe9fb; --bg2:#f3ecfb;
-  --blob1:rgba(90,160,255,.55); --blob2:rgba(48,176,199,.45); --blob3:rgba(175,82,222,.35); --blob4:rgba(255,149,0,.22);
+  --font: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Nunito", "Segoe UI", sans-serif;
+  /* palet dekorasi */
+  --teal:#2FB3A3; --indigo:#9B84EC; --blue:#55A8E6; --yellow:#F4BE3A; --red:#F2617A; --orange:#FF9A5C;
+  --purple:#B884E8; --pink:#F2759F; --cyan:#4CB8DC; --mint:#5CC98E; --brown:#C08A66; --coral:#FF7F6E; --grape:#8A74E0; --sage:#4FB89A; --rose:#E8609A; --gray:#B9ABA0;
+  /* warna status (makna klinis, jangan dipakai untuk hiasan) */
+  --ok:#3DBE73; --wa:#F5B82E; --or:#FF8A3D; --al:#EF4B5E; --inf:#5B8FE8; --na:#B9ABA0;
+  --ok-k:#1E8A4E; --wa-k:#9A6400; --or-k:#C25A12; --al-k:#D02C43; --inf-k:#3567C9; --na-k:#7D6F66;
+  --text:#4A2C2A; --text2:rgba(74,44,42,.62);
+  --bg:#FFF4E6; --card:#FFFBF5; --field:#F7EADB; --hair:rgba(74,44,42,.08);
+  --band1:#F9B2CC; --band2:#F48DB5; --lav:#A68CEE; --lav-field:#FFF8EE;
+  --clay: inset 0 -5px 0 rgba(120,70,40,.06), inset 0 3px 0 rgba(255,255,255,.95), 0 16px 28px -14px rgba(150,90,60,.40), 0 3px 0 rgba(170,120,90,.10);
+  --clay-sm: inset 0 -3px 0 rgba(0,0,0,.10), inset 0 2px 0 rgba(255,255,255,.45), 0 6px 12px -6px rgba(120,70,50,.45);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --text:#f2f2f7; --text2:rgba(235,235,245,.6);
-    --glass:rgba(40,44,58,.50); --glass2:rgba(40,44,58,.32); --stroke:rgba(255,255,255,.16); --hair:rgba(255,255,255,.06);
-    --field:rgba(118,118,128,.22); --shadow:0 10px 30px rgba(0,0,0,.35);
-    --bg1:#0b0f1a; --bg2:#141026;
-    --blob1:rgba(10,132,255,.40); --blob2:rgba(48,176,199,.30); --blob3:rgba(175,82,222,.30); --blob4:rgba(255,149,0,.12);
-    --green:#30D158; --yellow:#FFD60A; --orange:#FF9F0A; --red:#FF453A; --blue:#0A84FF;
+    --text:#FFF1E6; --text2:rgba(255,241,230,.62);
+    --bg:#241B2E; --card:#33283F; --field:#43364F; --hair:rgba(255,255,255,.07);
+    --band1:#7A3F72; --band2:#663264; --lav:#5E4D93; --lav-field:#3A2F48;
+    --ok-k:#6FE09B; --wa-k:#FFD36B; --or-k:#FFAE7A; --al-k:#FF8395; --inf-k:#8FB4FF; --na-k:#CBBFB6;
+    --clay: inset 0 -5px 0 rgba(0,0,0,.18), inset 0 2px 0 rgba(255,255,255,.07), 0 16px 28px -14px rgba(0,0,0,.6);
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%}
-body{
-  font:15px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;
-  color:var(--text); background:linear-gradient(160deg,var(--bg1),var(--bg2)); background-attachment:fixed;
-  -webkit-font-smoothing:antialiased;
-}
-/* latar: gumpalan warna buram (khas wallpaper Apple) */
-.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
-.bg i{position:absolute;border-radius:50%;filter:blur(70px)}
-.bg i:nth-child(1){width:55vmax;height:55vmax;left:-15vmax;top:-20vmax;background:var(--blob1)}
-.bg i:nth-child(2){width:45vmax;height:45vmax;right:-15vmax;top:5vmax;background:var(--blob2)}
-.bg i:nth-child(3){width:50vmax;height:50vmax;left:10vmax;bottom:-30vmax;background:var(--blob3)}
-.bg i:nth-child(4){width:30vmax;height:30vmax;right:5vmax;bottom:-5vmax;background:var(--blob4)}
+body{font:15px/1.35 var(--font);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 
-/* kaca */
-.glass{
-  position:relative; background:var(--glass);
-  -webkit-backdrop-filter:blur(28px) saturate(180%); backdrop-filter:blur(28px) saturate(180%);
-  border:1px solid var(--stroke); border-radius:26px; box-shadow:var(--shadow);
-}
-.glass::before{ /* kilau tipis di tepi atas */
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 38%);
-  mix-blend-mode:soft-light;
-}
-.wrap{max-width:760px;margin:0 auto;padding:max(14px,env(safe-area-inset-top)) 16px 28px}
-.top{position:sticky;top:0;z-index:10;padding-top:max(10px,env(safe-area-inset-top));margin:0 -16px;padding-left:16px;padding-right:16px;padding-bottom:10px}
-.top::before{content:"";position:absolute;inset:0;z-index:-1;
-  -webkit-backdrop-filter:blur(20px) saturate(170%);backdrop-filter:blur(20px) saturate(170%);
-  -webkit-mask:linear-gradient(#000 70%,transparent);mask:linear-gradient(#000 70%,transparent)}
-.bar{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.logo{width:44px;height:44px;border-radius:13px;flex:none;display:grid;place-items:center;
-  background:linear-gradient(135deg,#5AC8FA,#007AFF 55%,#5E5CE6);box-shadow:0 6px 16px rgba(0,122,255,.35), inset 0 1px 0 rgba(255,255,255,.5)}
+/* latar: gumpalan pastel + awan clay */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg i{position:absolute;border-radius:50%;opacity:.55}
+.bg i:nth-child(1){width:70vmin;height:70vmin;left:-30vmin;top:45vh;background:#E9DDFB}
+.bg i:nth-child(2){width:60vmin;height:60vmin;right:-28vmin;top:30vh;background:#FBD9E6}
+.bg i:nth-child(3){width:80vmin;height:80vmin;left:20vmin;bottom:-45vmin;background:#D8F1E2}
+.bg i:nth-child(4){width:40vmin;height:40vmin;right:-10vmin;bottom:5vh;background:#FFEDC2}
+@media (prefers-color-scheme: dark){.bg i{opacity:.12}}
+.cloud{position:absolute;width:120px;opacity:.9}
+.cloud.c1{left:-26px;top:62vh}.cloud.c2{right:-30px;bottom:8vh;width:150px}
+@media (prefers-color-scheme: dark){.cloud{opacity:.12}}
+
+/* kartu clay */
+.glass{position:relative;background:var(--card);border-radius:28px;box-shadow:var(--clay)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 28px}
+
+/* pita atas pink + tepi bergelombang */
+.top{position:sticky;top:0;z-index:10;margin:0 -16px 6px;padding:max(12px,env(safe-area-inset-top)) 16px 14px;
+  background:linear-gradient(180deg,var(--band1),var(--band2))}
+.top::after{content:"";position:absolute;left:0;right:0;bottom:-15px;height:16px;
+  background:radial-gradient(circle at 16px 0,var(--band2) 15.5px,transparent 16.5px) repeat-x;background-size:32px 16px}
+.bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.logo{width:42px;height:42px;border-radius:16px;flex:none;display:grid;place-items:center;background:#FFF8EE;color:var(--pink);box-shadow:var(--clay-sm)}
 .logo svg{width:28px;height:28px}
 .brand{flex:1;min-width:0}
-.brand b{display:block;font-size:20px;letter-spacing:-.3px;white-space:nowrap}
-.brand span{font-size:12px;color:var(--text2)}
-.icobtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--stroke);
-  background:var(--glass2);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);color:var(--text);cursor:pointer;flex:none}
+.brand b{display:block;font:800 19px/1.1 var(--font);letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;text-shadow:0 2px 0 rgba(160,50,90,.25)}
+.brand b em{font-style:normal;color:#5A2D45}
+.brand span{font:600 12px var(--font);color:rgba(90,30,60,.75)}
+@media (prefers-color-scheme: dark){.brand b em{color:#FFD1E4}.brand span{color:rgba(255,220,235,.75)}}
+.icobtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:0;background:#FFF8EE;color:var(--text);cursor:pointer;flex:none;box-shadow:var(--clay-sm)}
+@media (prefers-color-scheme: dark){.icobtn,.logo{background:#3A2F48}}
 .icobtn svg{width:19px;height:19px}
-.icobtn.red{color:var(--red)}
-.icobtn:active{transform:scale(.94)}
+.icobtn.red{color:var(--al)}
+.icobtn:active,.btn:active,.tile:active .ic{transform:translateY(2px) scale(.97)}
 
-.patient{padding:12px}
+/* kartu pasien lavender */
+.patient{padding:12px;background:var(--lav);box-shadow:var(--clay-sm)}
 .row{display:flex;gap:8px}
 .f{flex:1;min-width:0}
-.f label{display:block;font-size:12px;color:var(--text2);margin:0 0 4px 4px}
-.inp{display:flex;align-items:center;background:var(--field);border-radius:12px;padding:0 10px;border:1px solid transparent;transition:.15s}
-.inp input{flex:1;min-width:0;border:0;background:none;color:inherit;font:600 19px/1 -apple-system,sans-serif;padding:10px 0;font-variant-numeric:tabular-nums;outline:none}
-.inp input::placeholder{color:var(--text2);font-weight:400}
-.inp small{color:var(--text2);font-size:12px}
-.inp:focus-within{border-color:var(--blue);background:transparent}
-.inp.warn{background:color-mix(in srgb,var(--yellow) 18%,transparent);border-color:color-mix(in srgb,var(--yellow) 60%,transparent)}
-.inp.warn input{color:color-mix(in srgb,var(--yellow) 70%,var(--text))}
-.inp.alert{background:color-mix(in srgb,var(--red) 14%,transparent);border-color:color-mix(in srgb,var(--red) 55%,transparent)}
-.inp.alert input{color:var(--red)}
-.prow{display:flex;align-items:center;gap:10px;margin-top:10px}
-.seg{display:inline-flex;background:var(--field);border-radius:10px;padding:2px;gap:2px}
-.seg button{border:0;background:none;color:var(--text);font:600 13px -apple-system,sans-serif;padding:7px 14px;border-radius:8px;cursor:pointer}
-.seg button.on{background:var(--glass);box-shadow:0 1px 3px rgba(0,0,0,.12);border:.5px solid var(--stroke)}
+.f label{display:block;font:600 12px var(--font);color:var(--text2);margin:0 0 4px 6px}
+.inp{display:flex;align-items:center;background:var(--field);border-radius:14px;padding:0 11px;border:2px solid transparent;transition:.15s;box-shadow:inset 0 2px 3px rgba(120,70,40,.08)}
+.inp input{flex:1;min-width:0;border:0;background:none;color:inherit;font:700 19px/1 var(--font);padding:10px 0;font-variant-numeric:tabular-nums;outline:none}
+.inp input::placeholder{color:var(--text2);font-weight:500}
+.inp small{color:var(--text2);font:600 12px var(--font);white-space:nowrap;margin-left:4px}
+.inp:focus-within{border-color:var(--indigo)}
+.inp.warn{background:color-mix(in srgb,var(--wa) 22%,var(--card));border-color:var(--wa)}
+.inp.warn input{color:var(--wa-k)}
+.inp.alert{background:color-mix(in srgb,var(--al) 16%,var(--card));border-color:var(--al)}
+.inp.alert input{color:var(--al-k)}
+.patient .f label{color:#fff}
+.patient .inp{background:var(--lav-field)}
+.patient .inp:focus-within{border-color:var(--pink)}
+.prow{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;margin-top:10px}
+.seg{display:inline-flex;background:var(--field);border-radius:14px;padding:3px;gap:3px}
+.seg button{border:0;background:none;color:var(--text);font:700 13px var(--font);padding:7px 14px;border-radius:11px;cursor:pointer}
+.seg button.on{background:var(--card);box-shadow:var(--clay-sm);color:var(--pink)}
+.patient .seg{background:rgba(255,255,255,.28)}.patient .seg button{color:#fff}.patient .seg button.on{background:#FFF8EE;color:var(--pink)}
 .seg.full{display:flex}.seg.full button{flex:1}
 .hs{margin-left:auto;text-align:right}
-.hs b{display:block;color:var(--blue);font-size:16px;font-variant-numeric:tabular-nums}
-.hs span{font-size:12px;color:var(--text2)}
-.chk{display:flex;align-items:center;gap:6px;font-size:13px}
+.hs b{display:block;color:#fff;font:800 17px var(--font);font-variant-numeric:tabular-nums}
+.hs span{font:600 12px var(--font);color:rgba(255,255,255,.85)}
+.chk{display:flex;align-items:center;gap:6px;font:600 13px var(--font)}
+.patient .chk{color:#fff}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--pink)}
 
-.status{padding:12px 14px;margin-top:14px;border-radius:20px}
-.badge{display:inline-flex;align-items:center;gap:6px;color:#fff;font:800 13px -apple-system,sans-serif;letter-spacing:1.2px;padding:6px 12px;border-radius:99px}
-.demo{display:inline-block;margin-left:6px;font:800 11px -apple-system,sans-serif;letter-spacing:.5px;background:var(--yellow);color:#000;padding:5px 8px;border-radius:99px;vertical-align:middle}
-.action{font-weight:600;margin-top:8px}
-.zone{font-size:12px;color:var(--text2);margin-top:2px}
+.status{padding:14px 16px;margin-top:22px}
+.badge{display:inline-flex;align-items:center;gap:6px;font:800 13px var(--font);letter-spacing:1.2px;padding:7px 14px;border-radius:99px;box-shadow:var(--clay-sm)}
+.demo{display:inline-block;margin-left:6px;font:800 11px var(--font);letter-spacing:.5px;background:var(--wa);color:#4A2C2A;padding:6px 9px;border-radius:99px;vertical-align:middle}
+.action{font:700 15px var(--font);margin-top:9px}
+.zone{font:600 12px var(--font);color:var(--text2);margin-top:3px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px;padding:12px;margin-top:14px}
-.tile{border:0;background:none;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0;font:500 11.5px -apple-system,sans-serif}
-.tile .ic{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;color:var(--c);
-  background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 30%,transparent);transition:.15s}
-.tile .ic svg{width:24px;height:24px}
-.tile.on .ic{background:var(--c);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 45%,transparent), inset 0 1px 0 rgba(255,255,255,.4)}
-.tile.on{font-weight:700}
-.tile:active .ic{transform:scale(.93)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:12px 8px;padding:16px 10px;margin-top:16px}
+.tile{border:0;background:none;color:var(--text);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;padding:4px 0;font:700 11.5px var(--font)}
+.tile .ic{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;color:#fff;background:var(--c);box-shadow:var(--clay-sm);transition:.15s}
+.tile .ic svg{width:25px;height:25px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.12))}
+.tile.on .ic{transform:translateY(-3px);outline:3px solid color-mix(in srgb,var(--c) 45%,transparent);outline-offset:3px}
+.tile.on{color:var(--c);font-weight:800}
 
-.card{padding:16px;margin-top:14px}
-.ch{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.ch .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--c);color:#fff;flex:none}
-.ch .ic svg{width:21px;height:21px}
-.ch b{display:block;font-size:17px}
-.ch span{font-size:12px;color:var(--text2)}
+.card{padding:16px;margin-top:16px}
+.ch{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ch .ic{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;background:var(--c);color:#fff;flex:none;box-shadow:var(--clay-sm)}
+.ch .ic svg{width:23px;height:23px}
+.ch b{display:block;font:800 18px/1.15 var(--font);color:var(--text)}
+.ch span{font:600 12px var(--font);color:var(--text2)}
 .stack>*+*{margin-top:8px}
-.res{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--c) 11%,transparent)}
-.res .dot{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
-.res .l{flex:1}
-.res .v{font-weight:700;color:var(--c);text-align:right;font-variant-numeric:tabular-nums}
+.res{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:16px;background:color-mix(in srgb,var(--c) 15%,var(--card));box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--c) 18%,transparent)}
+.res .dot{width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.res .l{flex:1;font-weight:600}
+.res .v{font:800 15px var(--font);color:var(--k);text-align:right;font-variant-numeric:tabular-nums}
 .res.long{align-items:flex-start;flex-wrap:wrap}
-.res.long .v{flex-basis:100%;text-align:left;padding-left:18px}
-.note{font-size:12px;color:var(--text2)}
-.sel{position:relative;display:flex;align-items:center;gap:12px;background:var(--field);border-radius:14px;padding:10px 12px}
-.sel .n{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font:700 16px -apple-system,sans-serif;color:#fff;background:var(--c);flex:none}
-.sel .n.empty{background:var(--gray)}
+.res.long .v{flex-basis:100%;text-align:left;padding-left:19px}
+.note{font:500 12px/1.4 var(--font);color:var(--text2)}
+.sel{position:relative;display:flex;align-items:center;gap:12px;background:var(--field);border-radius:16px;padding:10px 12px}
+.sel .n{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font:800 16px var(--font);color:#fff;background:var(--c);flex:none;box-shadow:var(--clay-sm)}
+.sel .n.empty{background:var(--na)}
 .sel .t{flex:1;min-width:0}
-.sel .t b{display:block;font-size:14px}
-.sel .t span{font-size:12px;color:var(--text2)}
+.sel .t b{display:block;font:700 14px var(--font)}
+.sel .t span{font:500 12px var(--font);color:var(--text2)}
 .sel select{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer;font-size:16px}
 .sel .chev{color:var(--text2);font-size:12px}
-.pat{display:flex;align-items:center;gap:12px;background:var(--field);border-radius:14px;padding:10px 12px;border:0;width:100%;color:var(--text);text-align:left;cursor:pointer;font:inherit}
-.pat .L{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;background:var(--c);flex:none}
-.pat .t{flex:1}.pat .t b{display:block;font-size:14px}.pat .t span{font-size:12px;color:var(--text2)}
-.pill{font:700 12px -apple-system,sans-serif;color:#fff;background:var(--c);padding:5px 10px;border-radius:99px}
+.pat{display:flex;align-items:center;gap:12px;background:var(--field);border-radius:16px;padding:10px 12px;border:0;width:100%;color:var(--text);text-align:left;cursor:pointer;font:inherit}
+.pat .L{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:var(--c);flex:none;box-shadow:var(--clay-sm)}
+.pat .t{flex:1}.pat .t b{display:block;font:700 14px var(--font)}.pat .t span{font:500 12px var(--font);color:var(--text2)}
+.pill{font:800 12px var(--font);color:#fff;background:var(--c);padding:6px 11px;border-radius:99px;white-space:nowrap}
 .nrs{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
-.nrs button{border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);font:700 16px -apple-system,sans-serif;padding:10px 0;border-radius:10px;cursor:pointer}
-.nrs button.on{background:var(--c);color:#fff}
-.nrsl{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
-.pick{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
-.pick select{font:600 14px -apple-system,sans-serif;color:var(--blue);background:none;border:0;max-width:60%;text-align:right}
-footer{text-align:center;margin-top:22px;font-size:11px;color:var(--text2)}
-footer b{display:block;margin-top:6px;letter-spacing:2.5px;font-weight:600;color:var(--teal)}
+.nrs button{border:0;background:color-mix(in srgb,var(--c) 18%,var(--card));color:var(--k);font:800 16px var(--font);padding:11px 0;border-radius:12px;cursor:pointer;box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--c) 30%,transparent)}
+.nrs button.on{background:var(--c);color:#fff;box-shadow:var(--clay-sm)}
+.nrsl{display:flex;justify-content:space-between;font:600 11px var(--font);color:var(--text2)}
+.pick{display:flex;justify-content:space-between;align-items:center;gap:10px;font:600 14px var(--font)}
+.pick select{font:700 14px var(--font);color:var(--pink);background:none;border:0;max-width:60%;text-align:right}
+footer{text-align:center;margin-top:24px;font:500 11px/1.45 var(--font);color:var(--text2)}
+footer b{display:block;margin-top:8px;letter-spacing:2.5px;font-weight:800;color:var(--pink)}
 
 /* lembar cari & konfirmasi */
-.sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;padding:60px 14px;background:rgba(0,0,0,.25)}
+.sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-start;justify-content:center;padding:60px 14px;background:rgba(74,44,42,.28)}
 .sheet.show{display:flex}
 .sheet .panel{width:100%;max-width:560px;max-height:80vh;overflow:auto;padding:14px}
-.search{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:12px;padding:8px 12px}
-.search input{flex:1;border:0;background:none;color:inherit;font-size:16px;outline:none}
+.search{display:flex;align-items:center;gap:8px;background:var(--field);border-radius:14px;padding:8px 12px}
+.search input{flex:1;border:0;background:none;color:inherit;font:600 16px var(--font);outline:none}
 .sr{display:flex;align-items:center;gap:12px;padding:10px 6px;border-bottom:1px solid var(--hair);cursor:pointer}
-.sr .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff;background:var(--c);flex:none}
+.sr .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:#fff;background:var(--c);flex:none;box-shadow:var(--clay-sm)}
 .sr .ic svg{width:18px;height:18px}
-.sr .t{flex:1}.sr .t b{display:block;font-size:14px}.sr .t span{font-size:12px;color:var(--text2)}
-.sr .q{font-weight:700;color:var(--blue);font-size:13px;text-align:right}
-.btn{border:0;border-radius:12px;padding:12px;font:600 15px -apple-system,sans-serif;cursor:pointer;width:100%}
-.btn.red{background:var(--red);color:#fff}.btn.plain{background:var(--field);color:var(--text)}
+.sr .t{flex:1}.sr .t b{display:block;font:700 14px var(--font)}.sr .t span{font:500 12px var(--font);color:var(--text2)}
+.sr .q{font:800 13px var(--font);color:var(--pink);text-align:right}
+.btn{border:0;border-radius:16px;padding:13px;font:800 15px var(--font);cursor:pointer;width:100%;box-shadow:var(--clay-sm)}
+.btn.red{background:var(--al);color:#fff}.btn.plain{background:var(--field);color:var(--text)}
 .menu{position:absolute;right:16px;top:64px;z-index:20;padding:6px;display:none;min-width:250px}
 .menu.show{display:block}
-.menu button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--text);font:500 14px -apple-system,sans-serif;padding:10px 12px;border-radius:10px;cursor:pointer}
+.menu button{display:block;width:100%;text-align:left;border:0;background:none;color:var(--text);font:600 14px var(--font);padding:10px 12px;border-radius:12px;cursor:pointer}
 .menu button:hover{background:var(--field)}
 </style>
 </head>
 <body>
-<div class="bg"><i></i><i></i><i></i><i></i></div>
+<div class="bg"><i></i><i></i><i></i><i></i><span class="cloud c1"><svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><path d="M28 62a22 22 0 0 1-2-44 26 26 0 0 1 48-8 20 20 0 0 1 30 20 16 16 0 0 1-4 32Z" fill="#fff" stroke="#F1E2D2" stroke-width="2"/></svg></span><span class="cloud c2"><svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg"><path d="M28 62a22 22 0 0 1-2-44 26 26 0 0 1 48-8 20 20 0 0 1 30 20 16 16 0 0 1-4 32Z" fill="#fff" stroke="#F1E2D2" stroke-width="2"/></svg></span></div>
 
 <div class="wrap">
   <div class="top">
     <div class="bar">
-      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h4l2-5 3 10 3-8 2 3h6"/></svg></div>
-      <div class="brand"><b>Kalkulator PICU</b><span>Cairan · Observasi · Skor</span></div>
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h4l2-5 3 10 3-8 2 3h6"/></svg></div>
+      <div class="brand"><b>Kalkulator <em>PICU</em></b><span>Cairan · Observasi · Skor</span></div>
       <button class="icobtn" id="bSearch" aria-label="Cari"></button>
       <button class="icobtn red" id="bClear" aria-label="Kosongkan"></button>
       <button class="icobtn" id="bMore" aria-label="Menu"></button>
@@ -193,13 +198,13 @@ footer b{display:block;margin-top:6px;letter-spacing:2.5px;font-weight:600;color
 </div>
 
 <div class="sheet" id="sSearch"><div class="glass panel">
-  <div class="search"><span id="sIco"></span><input id="q" placeholder="HS, GCS, balance, FLACC…" autocomplete="off"><button class="icobtn" id="sClose" style="width:30px;height:30px">✕</button></div>
+  <div class="search"><span id="sIco"></span><input id="q" placeholder="Holliday-Segar, GCS, balance, FLACC…" autocomplete="off"><button class="icobtn" id="sClose" style="width:30px;height:30px">✕</button></div>
   <div id="results"></div>
 </div></div>
 
 <div class="sheet" id="sClear"><div class="glass panel" style="max-width:360px;margin-top:20vh">
   <b style="font-size:17px">Kosongkan semua isian pasien?</b>
-  <p class="note">BB, umur, TTV, PAT, cairan, GFR dan semua skor akan dihapus.</p>
+  <p class="note">Berat badan, umur, tanda vital, PAT, cairan, kekuatan otot, foot drop, GFR dan semua skor akan dihapus.</p>
   <div class="stack"><button class="btn red" id="cYes">Kosongkan (pasien baru)</button><button class="btn plain" id="cNo">Batal</button></div>
 </div></div>
 
@@ -227,6 +232,9 @@ const ICON = {
   cries: P(["M2 13a2 2 0 0 0 2-2V7a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0V4a2 2 0 0 1 4 0v13a2 2 0 0 0 4 0v-4a2 2 0 0 1 2-2"]),
   four: P(['<circle cx="12" cy="12" r="9"/>', "M12 12l4-4", "M12 3v2", "M21 12h-2", "M3 12h2"]),
   cpot: P(['<circle cx="12" cy="7" r="4"/>', "M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"]),
+  otot: P(["M6.5 6.5 17.5 17.5", "M21 21l-1-1", "M3 3l1 1", "M18 22l4-4", "M2 6l4-4", "M3 10l7-7", "M14 21l7-7"]),
+  footdrop: P(["M8 2v9c0 1.5-.5 3-1.5 4.5L5 18c-.8 1.4.2 3 1.8 3H18a2 2 0 0 0 2-2c0-1.4-1-2.4-2.4-2.8L12 15V2", "M8 6h4"]),
+  braden: P(['<rect x="1.5" y="7.5" width="21" height="9" rx="4.5" transform="rotate(-45 12 12)"/>', '<rect x="8.5" y="8.5" width="7" height="7" rx="1.5" transform="rotate(-45 12 12)"/>', '<circle cx="12" cy="10.6" r=".5"/>', '<circle cx="12" cy="13.4" r=".5"/>', '<circle cx="10.6" cy="12" r=".5"/>', '<circle cx="13.4" cy="12" r=".5"/>']),
 };
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
 
@@ -251,19 +259,19 @@ const Calc = {
   schofield(w, y, male) { const t = y < 3 ? 0 : y < 10 ? 1 : 2;
     return (male ? [59.512 * w - 30.4, 22.706 * w + 504.3, 17.686 * w + 658.2] : [58.317 * w - 31.1, 20.315 * w + 485.9, 13.384 * w + 692.6])[t]; },
   caldwell: (w, y) => 22 + 31.05 * w + 1.16 * y,
-  // RDA kcal/kg menurut umur (NRC 1989, dikutip buku ajar anak Indonesia). Umur ≥ 11 th perlu L/P.
+  // RDA kcal/kg menurut umur (NRC 1989, dikutip buku ajar anak Indonesia). Umur ≥ 11 tahun perlu jenis kelamin.
   rda(m, male) {
     if (m < 6) return [108, "0–6 bulan"]; if (m < 12) return [98, "6–12 bulan"]; if (m < 48) return [102, "1–3 tahun"];
     if (m < 84) return [90, "4–6 tahun"]; if (m < 132) return [70, "7–10 tahun"];
     if (male == null) return null;
-    if (m < 180) return [male ? 55 : 47, `11–14 tahun ${male ? "L" : "P"}`];
-    return [male ? 45 : 40, `15–18 tahun ${male ? "L" : "P"}`]; },
+    if (m < 180) return [male ? 55 : 47, `11–14 tahun ${male ? "laki-laki" : "perempuan"}`];
+    return [male ? 45 : 40, `15–18 tahun ${male ? "laki-laki" : "perempuan"}`]; },
   iwlRate: (m, neo) => neo ? 50 : m <= 12 ? 40 : m <= 60 ? 30 : 20,
   iwlLabel: (m, neo) => neo ? "neonatus" : m <= 12 ? "1–12 bulan" : m <= 60 ? "> 1–5 tahun" : "> 5 tahun",
   balance(i, u, o, h, w, m, neo) { if (!(h > 0 && w > 0)) return null;
     const iwl = Calc.iwlRate(m, neo) * w / 24 * h, out = u + o + iwl, bal = i - out;
     return { iwl, out, bal, perKg: bal / w, perKgH: bal / w / h, diuresis: u / w / h }; },
-  bandNames: ["< 1 th", "1–2 th", "2–5 th", "5–12 th", "> 12 th"],
+  bandNames: ["< 1 tahun", "1–2 tahun", "2–5 tahun", "5–12 tahun", "> 12 tahun"],
   hr: [[110, 160], [100, 150], [95, 140], [80, 120], [60, 100]],
   rr: [[30, 40], [25, 35], [25, 30], [20, 25], [15, 20]],
   sbp: [[70, 90], [85, 95], [85, 100], [90, 110], [100, 120]],
@@ -273,18 +281,18 @@ const Calc = {
   tempZone: t => t < 35 || t >= 39.5 ? 3 : t < 36 || t >= 38 ? 1 : 0,
   crtZone: c => c > 3 ? 3 : c > 2 ? 1 : 0,
   map: (s, d) => (s + 2 * d) / 3,
-  patImp: { "000": ["Stable", "Stabil"], "100": ["CNS", "Disfungsi SSP primer / masalah sistemik (metabolik, toksik, sepsis)"],
+  patImp: { "000": ["Stable", "Stabil"], "100": ["CNS", "Disfungsi susunan saraf pusat primer / masalah sistemik (metabolik, toksik, sepsis)"],
     "010": ["Dist", "Distres napas"], "001": ["Shock C", "Syok terkompensasi"], "110": ["Resp fail", "Gagal napas"],
     "101": ["Shock D", "Syok dekompensasi (hipotensi)"], "011": ["Dist+C", "Distres napas dengan gangguan sirkulasi — evaluasi syok"],
     "111": ["CP fail", "Gagal kardiopulmonal"] },
-  esc: { 1: "Tingkatkan frekuensi observasi, lapor ke PJ shift", 2: "Lapor dokter jaga / residen, review dalam 30 menit", 3: "Lapor DPJP, panggil tim sekarang, review segera" },
+  esc: { 1: "Tingkatkan frekuensi observasi, lapor ke penanggung jawab shift", 2: "Lapor dokter jaga / residen, review dalam 30 menit", 3: "Lapor DPJP, panggil tim sekarang, review segera" },
   statusLabel: { "-1": "BELUM DINILAI", 0: "STABLE", 1: "MONITOR", 2: "ALERT", 3: "CRITICAL" },
   schwartz: (k, h, c) => k > 0 && h > 0 && c > 0 ? k * h / c : null,
-  kOpts: [[0.33, "0,33 · bayi prematur"], [0.45, "0,45 · bayi < 1 tahun"], [0.55, "0,55 · anak"], [0.70, "0,70 · dewasa"]],
-  defK: (m, pre) => pre ? 0.33 : m < 12 ? 0.45 : 0.55,
+  kOpts: [[0.33, "0,33 · bayi prematur"], [0.45, "0,45 · bayi < 1 tahun"], [0.55, "0,55 · anak & remaja perempuan"], [0.70, "0,70 · remaja laki-laki ≥ 13 tahun"], [0.413, "0,413 · bedside (kreatinin enzimatik)"]],
+  defK: (m, pre, male) => pre ? 0.33 : m < 12 ? 0.45 : male === true && m >= 156 ? 0.70 : 0.55,
   gfrN: [["Lahir", 20.8, 1.9], ["1 minggu", 46.6, 5.2], ["3–5 minggu", 60.1, 4.6], ["6–9 minggu", 67.5, 6.5], ["3–6 bulan", 73.8, 7.2],
     ["6–12 bulan", 93.7, 14], ["1–2 tahun", 99.1, 18.7], ["2–5 tahun", 126.5, 24], ["5–15 tahun", 116.7, 20.2], ["Dewasa", 120, 0]],
-  gfrRow(m, k) { if (k >= 0.70) return 9; if (m < 3) return null; if (m < 6) return 4; if (m < 12) return 5; if (m < 24) return 6; if (m < 60) return 7; if (m < 180) return 8; return 9; },
+  gfrRow(m) { if (m < 3) return null; if (m < 6) return 4; if (m < 12) return 5; if (m < 24) return 6; if (m < 60) return 7; if (m < 180) return 8; return 9; },
   gfrLower: r => r === 9 ? Calc.gfrN[9][1] : Calc.gfrN[r][1] - Calc.gfrN[r][2],
   gfrText: r => r === 9 ? "Dewasa: 120 (rerata)" : `${Calc.gfrN[r][0]}: ${id(Calc.gfrN[r][1])} ± ${id(Calc.gfrN[r][2])}`,
   pRIFLE: (dec, g) => dec >= 75 || g < 35 ? ["F – Failure", 3] : dec >= 50 ? ["I – Injury", 2] : dec >= 25 ? ["R – Risk", 1] : ["Tidak memenuhi kriteria pRIFLE (GFR)", 0],
@@ -316,7 +324,7 @@ const S = {
     I("C – Dapat ditenangkan", [[0, "Puas, rileks"], [1, "Tenang dengan sentuhan / pelukan / diajak bicara"], [2, "Sulit ditenangkan"]])],
   cheops: () => [I("Menangis", [[1, "Tidak menangis — anak tidak menangis"], [2, "Menangis pelan — menangis pelan atau tidak bersuara"], [2, "Menangis — menangis lemah atau memekik"], [3, "Berteriak — menangis kuat, tersedu-sedu"]]),
     I("Wajah", [[1, "Biasa — ekspresi wajah netral"], [2, "Meringis — ekspresi negatif, meringis kesakitan"], [0, "Tersenyum — ekspresi wajah positif"]]),
-    I("Verbal", [[1, "Tidak mengeluh — anak tidak bicara"], [1, "Mengeluh selain nyeri — mis. “Aku capek”"], [2, "Mengeluh nyeri — mengeluh tentang nyerinya"], [2, "Mengeluh keduanya — mis. “Aku sakit, ingin bertemu ibu”"], [0, "Bicara positif — tanpa mengeluh"]]),
+    I("Verbal", [[1, "Tidak mengeluh — anak tidak bicara"], [1, "Mengeluh selain nyeri — misalnya “Aku capek”"], [2, "Mengeluh nyeri — mengeluh tentang nyerinya"], [2, "Mengeluh keduanya — misalnya “Aku sakit, ingin bertemu ibu”"], [0, "Bicara positif — tanpa mengeluh"]]),
     I("Badan", [[1, "Netral — badan istirahat"], [2, "Berpindah — badan bergerak"], [2, "Tegang — badan kaku"], [2, "Menggigil — gerak tidak terkontrol"], [2, "Tegak — posisi vertikal / tegak"], [2, "Terkait — badan terikat"]]),
     I("Sentuhan", [[1, "Tidak menyentuh luka"], [2, "Meraih — mencoba meraih luka"], [2, "Menyentuh — menyentuh luka pelan"], [2, "Memegang — memegang luka kuat"], [2, "Terikat — tangan diikat"]]),
     I("Kaki", [[1, "Netral — kaki relaks, bergerak pelan"], [2, "Menendang — kaki menendang keluar"], [2, "Kaku/tegang — kaki tertarik ke badan"], [2, "Berdiri — berdiri, membungkuk, berlutut"], [2, "Terikat — kaki terikat"]])],
@@ -328,7 +336,7 @@ const S = {
     I("Tingkat kesadaran", [[0, "Tenang, tidur lelap atau bangun"], [1, "Sadar, gelisah"]])],
   cries: () => [I("C – Menangis", [[0, "Tidak menangis / tidak mengerang keras"], [1, "Mengerang keras tapi mudah ditenangkan"], [2, "Mengerang keras dan tidak dapat ditenangkan"]]),
     I("R – Butuh O₂ untuk SaO₂ < 95%", [[0, "Tidak membutuhkan oksigen"], [1, "Membutuhkan oksigen < 30%"], [2, "Membutuhkan oksigen > 30%"]]),
-    I("I – Peningkatan TTV (TD & HR)", [[0, "Tidak berubah / kurang dari nilai awal"], [1, "Meningkat < 20% dari nilai awal"], [2, "Meningkat > 20% dari nilai awal"]]),
+    I("I – Peningkatan tanda vital (tekanan darah & nadi)", [[0, "Tidak berubah / kurang dari nilai awal"], [1, "Meningkat < 20% dari nilai awal"], [2, "Meningkat > 20% dari nilai awal"]]),
     I("E – Ekspresi", [[0, "Tidak menyeringai"], [1, "Menyeringai"], [2, "Menyeringai dan mendengkur bukan karena menangis"]]),
     I("S – Sulit tidur", [[0, "Dapat tidur secara kontinu"], [1, "Bangun pada interval yang sering"], [2, "Bangun terus-menerus"]])],
   cpot: it => [I("Ekspresi wajah", [[0, "Rileks, netral"], [1, "Tegang"], [2, "Meringis"]]),
@@ -356,6 +364,7 @@ const blank = () => ({ isDemo: false, weight: "", ageYears: "", ageMonths: "", m
   gcsPreverbal: true, gcs: [null, null, null], comfortVent: false, comfort: Array(6).fill(null), four: Array(4).fill(null),
   flacc: Array(5).fill(null), cheops: Array(6).fill(null), nips: Array(6).fill(null), cries: Array(5).fill(null),
   cpotInt: false, cpot: Array(4).fill(null), nrs: null,
+  otot: Array(4).fill(null), footdrop: Array(6).fill(null), fdSedasi: false, fdVent: false, fdImob: false, fdNeuro: false, braden: Array(7).fill(null),
   heightCm: "", creatinine: "", ureum: "", premature: false, schwartzK: null, gfrRow: null });
 const demo = () => Object.assign(blank(), { isDemo: true, weight: "12", ageYears: "2", ageMonths: "2", male: true, spo2Low: "92", spo2High: "97",
   hr: "172", rr: "62", sbp: "92", dbp: "52", spo2: "95", temp: "37,5", crt: "3", pat: [false, true, true],
@@ -371,9 +380,9 @@ const D = {
   tm: () => { const y = D.years(), m = D.months(); return y == null || m == null ? null : y * 12 + m; },
   neo: () => p.neonate && D.tm() === 0,
   band: () => { const m = D.tm(); return m == null ? null : Calc.band(m); },
-  ageText: () => { const m = D.tm(); return m == null ? "–" : m < 12 ? `${m} bulan` : `${Math.floor(m / 12)} th ${m % 12} bl`; },
+  ageText: () => { const m = D.tm(); return m == null ? "–" : m < 12 ? `${m} bulan` : `${Math.floor(m / 12)} tahun ${m % 12} bulan`; },
   vitals() { const out = [], b = D.band(), add = (n, v, z) => v != null && out.push({ n, v, z });
-    if (b != null) { add("HR", parse(p.hr), parse(p.hr) != null && Calc.zone(parse(p.hr), Calc.hr[b])); add("RR", parse(p.rr), parse(p.rr) != null && Calc.zone(parse(p.rr), Calc.rr[b])); add("TD sistol", parse(p.sbp), parse(p.sbp) != null && Calc.zone(parse(p.sbp), Calc.sbp[b])); }
+    if (b != null) { add("Nadi (HR)", parse(p.hr), parse(p.hr) != null && Calc.zone(parse(p.hr), Calc.hr[b])); add("Napas (RR)", parse(p.rr), parse(p.rr) != null && Calc.zone(parse(p.rr), Calc.rr[b])); add("Tekanan darah sistolik", parse(p.sbp), parse(p.sbp) != null && Calc.zone(parse(p.sbp), Calc.sbp[b])); }
     const s = parse(p.spo2); add("SpO₂", s, s != null && Calc.spo2Zone(s, parse(p.spo2Low), parse(p.spo2High)));
     const t = parse(p.temp); add("Suhu", t, t != null && Calc.tempZone(t));
     const c = parse(p.crt); add("CRT", c, c != null && Calc.crtZone(c));
@@ -383,24 +392,24 @@ const D = {
   patLevel: () => { const n = p.pat.filter(x => x === true).length; return n >= 2 ? 3 : n === 1 ? 2 : 0; },
   level() { const v = D.vitals(); if (!v.length && p.pat.every(x => x === null)) return -1;
     const worst = Math.max(0, ...v.map(x => x.z)); return Math.max(worst === 3 ? 3 : worst === 1 ? 1 : 0, D.patLevel()); },
-  action: l => l === -1 ? "Isi TTV dan/atau PAT untuk menilai status" : l === 0 ? "Observasi rutin sesuai jadwal" : Calc.esc[l],
+  action: l => l === -1 ? "Isi tanda vital dan/atau PAT untuk menilai status" : l === 0 ? "Observasi rutin sesuai jadwal" : Calc.esc[l],
   rdaAuto: () => { const m = D.tm(); return m == null ? null : Calc.rda(m, p.male); },
   bbi: () => { const v = parse(p.bbIdeal); return v != null && v >= .3 && v <= 150 ? v : null; },
   rdaCalc() { const w = D.w(); if (w == null) return null; const man = parse(p.rda), auto = D.rdaAuto();
     const perKg = man ?? auto?.[0]; if (perKg == null) return null; const bbi = D.bbi(), base = bbi ?? w;
-    return { perKg, src: man != null ? "diisi manual" : `otomatis ${auto[1]}`, base, baseLabel: bbi != null ? "BB ideal" : "BB aktual", kcal: perKg * base }; },
+    return { perKg, src: man != null ? "diisi manual" : `otomatis ${auto[1]}`, base, baseLabel: bbi != null ? "berat badan ideal" : "berat badan aktual", kcal: perKg * base }; },
   total: a => a.includes(null) ? null : a.reduce((x, y) => x + y, 0),
   cheopsTotal: () => p.cheops.includes(null) ? null : S.cheops().reduce((s, it, i) => s + it.opts[p.cheops[i]][0], 0),
   bal() { const w = D.w(), m = D.tm(), i = parse(p.balIntake), h = parse(p.balHours);
     if (w == null || m == null || i == null || h == null) return null;
     return Calc.balance(i, parse(p.balUrine) ?? 0, parse(p.balOther) ?? 0, h, w, m, D.neo()); },
   gfr() { const m = D.tm(), h = parse(p.heightCm), c = parse(p.creatinine); if (m == null || h == null || c == null) return null;
-    const k = p.schwartzK ?? Calc.defK(m, p.premature); return Calc.schwartz(k, h, c); },
+    const k = p.schwartzK ?? Calc.defK(m, p.premature, p.male); return Calc.schwartz(k, h, c); },
   warnings() { const o = [];
-    if (p.weight && D.w() == null) o.push(`BB ${p.weight} tidak masuk akal — isi dalam kg (0,3–150), bukan gram.`);
-    if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18. Bayi: isi di kotak bulan (mis. 0 th 6 bl).");
+    if (p.weight && D.w() == null) o.push(`Berat badan ${p.weight} tidak masuk akal — isi dalam kg (0,3–150), bukan gram.`);
+    if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18. Bayi: isi di kotak bulan (misalnya 0 tahun 6 bulan).");
     if (D.months() == null) o.push("Umur bulan harus bilangan bulat 0–11 (12 bulan = 1 tahun 0 bulan).");
-    const s = parse(p.sbp), d = parse(p.dbp); if (s != null && d != null && d >= s) o.push(`Diastol (${id(d, 0)}) ≥ sistol (${id(s, 0)}) — cek ulang TD.`);
+    const s = parse(p.sbp), d = parse(p.dbp); if (s != null && d != null && d >= s) o.push(`Diastol (${id(d, 0)}) ≥ sistol (${id(s, 0)}) — cek ulang tekanan darah.`);
     return o; },
   indication(sc) { const m = D.tm(); if (m == null) return null; const a = D.ageText();
     return { NIPS: D.neo() ? null : `Indikasi NIPS: neonatus. Pasien ${a} — pertimbangkan skala lain.`,
@@ -412,13 +421,14 @@ const D = {
 };
 
 /* ============ komponen tampilan ============ */
-const LV = { "-1": "var(--gray)", 0: "var(--green)", 1: "var(--yellow)", 2: "var(--orange)", 3: "var(--red)" };
-const ST = { ok: "var(--green)", warn: "var(--yellow)", alert: "var(--red)", info: "var(--blue)" };
+const LV = { "-1": "var(--na)", 0: "var(--ok)", 1: "var(--wa)", 2: "var(--or)", 3: "var(--al)" };
+const LVK = { "-1": "var(--na-k)", 0: "var(--ok-k)", 1: "var(--wa-k)", 2: "var(--or-k)", 3: "var(--al-k)" };
+const ST = { ok: ["var(--ok)", "var(--ok-k)"], warn: ["var(--wa)", "var(--wa-k)"], alert: ["var(--al)", "var(--al-k)"], info: ["var(--inf)", "var(--inf-k)"] };
 const lvSt = l => l >= 2 ? "alert" : l === 1 ? "warn" : "ok";
-const res = (l, v, st = "info") => `<div class="res${String(v).length > 34 ? " long" : ""}" style="--c:${ST[st]}"><span class="dot"></span><span class="l">${esc(l)}</span><span class="v">${esc(v)}</span></div>`;
+const res = (l, v, st = "info") => `<div class="res${String(v).length > 34 ? " long" : ""}" style="--c:${ST[st][0]};--k:${ST[st][1]}"><span class="dot"></span><span class="l">${esc(l)}</span><span class="v">${esc(v)}</span></div>`;
 const field = (k, label, unit, zone, ph = "–") => `<div class="f"><label>${label}</label><div class="inp" ${zone ? `data-zone="${zone}"` : ""}><input data-k="${k}" inputmode="decimal" placeholder="${esc(ph)}" value="${esc(p[k])}"><small>${unit}</small></div></div>`;
 const seg = (k, opts) => `<div class="seg full">${opts.map(([v, t]) => `<button data-seg="${k}" data-v="${v}" class="${p[k] === v ? "on" : ""}">${t}</button>`).join("")}</div>`;
-const card = (key, title, sub, color, body) => `<div class="ch" style="--c:${color}"><div class="ic">${svg(key)}</div><div><b style="color:${color}">${title}</b><span>${sub}</span></div></div><div class="stack">${body}<div id="res" class="stack"></div></div>`;
+const card = (key, title, sub, color, body) => `<div class="ch" style="--c:${color}"><div class="ic">${svg(key)}</div><div><b>${title}</b><span>${sub}</span></div></div><div class="stack">${body}<div id="res" class="stack"></div></div>`;
 const scoreRows = (key, items, choice) => items.map((it, i) => {
   const val = p[key][i], picked = val == null ? null : choice ? it.opts[val] : it.opts.find(o => o[0] === val);
   return `<label class="sel" style="--c:var(--c0)"><span class="n ${picked ? "" : "empty"}">${picked ? picked[0] : "–"}</span>
@@ -430,18 +440,18 @@ const incomplete = a => res("Total", `Belum lengkap (${a.filter(x => x != null).
 
 /* ============ bagian (fitur) ============ */
 const SEC = {
-  kebutuhan: { t: "HS & Kalori", c: "var(--teal)", g: "Cairan",
+  kebutuhan: { t: "Cairan & Kalori", c: "var(--teal)", g: "Cairan",
     body: () => { const a = D.rdaAuto();
       return card("kebutuhan", "Kebutuhan cairan & kalori", "Blok Requirements & Plan kardeks", "var(--teal)",
-        `<div class="row">${field("rda", "RDA (kosong = otomatis)", "kcal/kg", null, a ? `${a[0]} oto` : "–")}${field("bbIdeal", "BB ideal (opsional)", "kg")}</div>`); },
+        `<div class="row">${field("rda", "RDA (kosong = otomatis)", "kcal/kg", null, a ? `${a[0]} otomatis` : "–")}${field("bbIdeal", "Berat badan ideal (opsional)", "kg")}</div>`); },
     res() { const w = D.w(), y = D.years(), m = D.tm(); if (w == null) return `<p class="note">Isi berat badan & umur di bagian atas.</p>`;
       const hs = Calc.hs(w); let h = res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
-      h += res("Schofield", y != null && p.male != null ? `${id(Calc.schofield(w, y, p.male), 0)} kcal` : "isi umur & L/P");
+      h += res("Schofield", y != null && p.male != null ? `${id(Calc.schofield(w, y, p.male), 0)} kcal` : "isi umur & jenis kelamin");
       h += res("Caldwell-Kennedy (REE)", y != null ? `${id(Calc.caldwell(w, y), 0)} kcal` : "isi umur");
       const r = D.rdaCalc();
       if (r) h += res(`RDA (${r.src}) × ${r.baseLabel}`, `${id(r.perKg, 0)} × ${id(r.base)} kg = ${id(r.kcal, 0)} kcal`);
-      else h += res("RDA × BB", m == null ? "isi umur" : "pilih L/P (umur ≥ 11 th)");
-      if (p.bbIdeal && D.bbi() == null) h += res("BB ideal", "tidak masuk akal — isi dalam kg", "alert");
+      else h += res("RDA × berat badan", m == null ? "isi umur" : "pilih jenis kelamin (umur ≥ 11 tahun)");
+      if (p.bbIdeal && D.bbi() == null) h += res("Berat badan ideal", "tidak masuk akal — isi dalam kg", "alert");
       h += `<p class="note">RDA otomatis: tabel RDA (NRC 1989) — cocokkan dengan acuan unit; isi kotak RDA untuk mengganti.</p>`;
       if (m != null) { const n = D.neo(), iwl = Calc.iwlRate(m, n) * w; h += res(`IWL RSSA (${Calc.iwlLabel(m, n)}: ${Calc.iwlRate(m, n)} cc/kg)`, `${id(iwl, 0)} cc/hari · ${id(iwl / 24)} cc/jam`); }
       else h += res("IWL RSSA", "isi umur");
@@ -449,50 +459,50 @@ const SEC = {
   balance: { t: "Balance", c: "var(--indigo)", g: "Cairan",
     body: () => card("balance", "Balance per blok", "Balance = intake − (output + IWL)", "var(--indigo)",
       `<div class="row">${field("balIntake", "Intake", "cc")}${field("balHours", "Lama blok", "jam")}</div><div class="row">${field("balUrine", "Urine", "cc")}${field("balOther", "Output lain", "cc")}</div>`),
-    res() { const b = D.bal(); if (!b) return res("Balance", D.w() == null || D.tm() == null ? "isi BB & umur di bagian atas" : "isi intake & lama blok");
+    res() { const b = D.bal(); if (!b) return res("Balance", D.w() == null || D.tm() == null ? "isi berat badan & umur di bagian atas" : "isi intake & lama blok");
       const h = parse(p.balHours); let s = p.balUrine.trim() ? "" : res("Urine kosong", "dihitung 0 cc — pastikan memang anuria", "warn");
       return s + res(`IWL ${id(h)} jam`, `${id(b.iwl)} cc`) + res("Total output (+ IWL)", `${id(b.out)} cc`) + res("Balance", `${signed(b.bal, 1)} cc`, b.bal > 0 ? "warn" : "ok")
-        + res("Balance ÷ BB", `${signed(b.perKg, 2)} cc/kg`) + res(`Balance ÷ BB ÷ ${id(h)} jam`, `${signed(b.perKgH, 2)} cc/kg/jam`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
-  intake: { t: "% Maint.", c: "var(--blue)", g: "Cairan",
+        + res("Balance ÷ berat badan", `${signed(b.perKg, 2)} cc/kg`) + res(`Balance ÷ berat badan ÷ ${id(h)} jam`, `${signed(b.perKgH, 2)} cc/kg/jam`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
+  intake: { t: "% Maintenance", c: "var(--blue)", g: "Cairan",
     body: () => card("intake", "Intake vs maintenance", "Semua jalur: infus + sonde + obat", "var(--blue)", field("intakePerHour", "Total intake", "cc/jam")),
     res() { const w = D.w(), i = parse(p.intakePerHour); if (w == null || i == null) return ""; const pct = i / (Calc.hs(w) / 24) * 100;
       return res("Dari maintenance", `${id(pct, 0)}%`, pct > 100 ? "alert" : "ok"); } },
   gfr: { t: "GFR", c: "var(--yellow)", g: "Ginjal",
-    body() { const m = D.tm(); const autoK = m == null ? 0.55 : Calc.defK(m, p.premature), k = p.schwartzK ?? autoK, ar = m == null ? null : Calc.gfrRow(m, k);
-      return card("gfr", "GFR · Schwartz", "Lembar Menentukan GFR PICU RSSA", "var(--orange)",
+    body() { const m = D.tm(); const autoK = m == null ? 0.55 : Calc.defK(m, p.premature, p.male), k = p.schwartzK ?? autoK, ar = m == null ? null : Calc.gfrRow(m);
+      return card("gfr", "GFR · Schwartz", "Lembar Menentukan GFR PICU RSSA", "var(--yellow)",
         `<div class="row">${field("heightCm", "Tinggi badan", "cm")}${field("creatinine", "Kreatinin", "mg/dL")}${field("ureum", "Ureum", "mg/dL")}</div>
         <label class="chk"><input type="checkbox" data-bool="premature" ${p.premature ? "checked" : ""}> Bayi prematur</label>
-        <div class="pick">Konstanta k <select data-pick="schwartzK"><option value="">Otomatis (${id(autoK, 2)})</option>${Calc.kOpts.map(([v, t]) => `<option value="${v}" ${p.schwartzK === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
-        <div class="pick">Nilai normal LFG <select data-pick="gfrRow"><option value="">${ar != null ? `Otomatis (${Calc.gfrN[ar][0]})` : "Pilih (umur < 3 bulan)"}</option>${Calc.gfrN.map((_, i) => `<option value="${i}" ${p.gfrRow === i ? "selected" : ""}>${Calc.gfrText(i)}</option>`).join("")}</select></div>`); },
+        <div class="pick">Konstanta k <select data-pick="schwartzK"><option value="">Otomatis (${id(autoK, 3)})</option>${Calc.kOpts.map(([v, t]) => `<option value="${v}" ${p.schwartzK === v ? "selected" : ""}>${t}</option>`).join("")}</select></div>
+        <div class="pick">Nilai normal laju filtrasi glomerulus <select data-pick="gfrRow"><option value="">${ar != null ? `Otomatis (${Calc.gfrN[ar][0]})` : "Pilih (umur < 3 bulan)"}</option>${Calc.gfrN.map((_, i) => `<option value="${i}" ${p.gfrRow === i ? "selected" : ""}>${Calc.gfrText(i)}</option>`).join("")}</select></div>`); },
     res() { const m = D.tm(); let h = "";
       if (m == null) h += `<p class="note">Isi umur di bagian atas.</p>`;
-      else { const k = p.schwartzK ?? Calc.defK(m, p.premature), g = D.gfr();
-        if (g == null) h += res("GFR", "isi TB & kreatinin");
-        else { h += res(`GFR (k ${id(k, 2)})`, `${id(g)} ml/min/1,73 m²`); const row = p.gfrRow ?? Calc.gfrRow(m, k);
+      else { const k = p.schwartzK ?? Calc.defK(m, p.premature, p.male), g = D.gfr();
+        if (g == null) h += res("GFR", "isi tinggi badan & kreatinin");
+        else { h += res(`GFR (k ${id(k, 3)})`, `${id(g)} ml/min/1,73 m²`); const row = p.gfrRow ?? Calc.gfrRow(m);
           if (row == null) h += res("Penurunan GFR", "pilih nilai normal usia");
           else { const lo = Calc.gfrLower(row), dec = lo > 0 && g < lo ? (lo - g) / lo * 100 : 0, r = Calc.pRIFLE(dec, g);
-            h += res(`Batas bawah ${Calc.gfrN[row][0]} (${row === 9 ? "rerata" : "rerata − SD"})`, id(lo)) + res("Penurunan GFR", dec > 0 ? `${id(dec)}%` : "tidak menurun", dec >= 25 ? "alert" : "ok")
+            h += res(`Batas bawah ${Calc.gfrN[row][0]} (${row === 9 ? "rerata" : "rerata − simpang baku"})`, id(lo)) + res("Penurunan GFR", dec > 0 ? `${id(dec)}%` : "tidak menurun", dec >= 25 ? "alert" : "ok")
               + res("pRIFLE", r[0], r[1] >= 2 ? "alert" : r[1] === 1 ? "warn" : "ok"); } } }
       const u = parse(p.ureum), c = parse(p.creatinine);
-      if (u != null) { const bun = u / 2.14; h += res("BUN (ureum ÷ 2,14)", `${id(bun)} mg/dL`); if (c) { const r = bun / c; h += res(`BUN/Cr ${id(r)}`, Calc.bunClass(r), r > 20 ? "warn" : "info"); } }
-      return h + `<p class="note">pRIFLE urine: Risk &lt; 0,5 cc/kg/jam 8 jam · Injury &lt; 0,5 selama 16 jam · Failure &lt; 0,3 selama 24 jam atau anuria 12 jam.</p>`; } },
-  ttv: { t: "TTV", c: "var(--red)", g: "Observasi",
-    body() { const b = D.band(); return card("ttv", "Tanda vital", b != null ? `Zona ${Calc.bandNames[b]}: HR ${Calc.hr[b].join("–")} · RR ${Calc.rr[b].join("–")} · SBP ${Calc.sbp[b].join("–")}` : "Isi umur supaya HR, RR & TD diberi warna sesuai umur", "var(--red)",
-      `<div class="row">${field("hr", "HR", "/mnt", "HR")}${field("rr", "RR", "/mnt", "RR")}</div><div class="row">${field("sbp", "TD sistol", "mmHg", "TD sistol")}${field("dbp", "diastol", "mmHg")}</div>
-       <div class="row">${field("spo2", "SpO₂", "%", "SpO₂")}${field("temp", "Suhu", "°C", "Suhu")}${field("crt", "CRT", "dtk", "CRT")}</div><div class="row">${field("spo2Low", "Target SpO₂ bawah", "%")}${field("spo2High", "atas", "%")}</div>`); },
+      if (u != null) { const bun = u / 2.14; h += res("BUN (ureum ÷ 2,14)", `${id(bun)} mg/dL`); if (c) { const r = bun / c; h += res(`BUN/kreatinin ${id(r)}`, Calc.bunClass(r), r > 20 ? "warn" : "info"); } }
+      return h + `<p class="note">k otomatis: 0,33 prematur · 0,45 bayi &lt; 1 tahun · 0,70 remaja laki-laki ≥ 13 tahun · 0,55 lainnya (Schwartz klasik, kreatinin Jaffe). Bila lab memakai kreatinin enzimatik, pilih 0,413.</p><p class="note">pRIFLE urine: Risk &lt; 0,5 cc/kg/jam 8 jam · Injury &lt; 0,5 selama 16 jam · Failure &lt; 0,3 selama 24 jam atau anuria 12 jam.</p>`; } },
+  ttv: { t: "Tanda Vital", c: "var(--red)", g: "Observasi",
+    body() { const b = D.band(); return card("ttv", "Tanda vital", b != null ? `Zona ${Calc.bandNames[b]}: nadi ${Calc.hr[b].join("–")} · napas ${Calc.rr[b].join("–")} · sistolik ${Calc.sbp[b].join("–")}` : "Isi umur supaya nadi, napas & tekanan darah diberi warna sesuai umur", "var(--red)",
+      `<div class="row">${field("hr", "Nadi (HR)", "x/menit", "Nadi (HR)")}${field("rr", "Napas (RR)", "x/menit", "Napas (RR)")}</div><div class="row">${field("sbp", "Tekanan darah sistolik", "mmHg", "Tekanan darah sistolik")}${field("dbp", "Diastolik", "mmHg")}</div>
+       <div class="row">${field("spo2", "SpO₂", "%", "SpO₂")}${field("temp", "Suhu", "°C", "Suhu")}${field("crt", "CRT", "detik", "CRT")}</div><div class="row">${field("spo2Low", "Target SpO₂ bawah", "%")}${field("spo2High", "Target SpO₂ atas", "%")}</div>`); },
     res() { const s = parse(p.sbp), d = parse(p.dbp); return s != null && d != null && d < s ? res("MAP", `${id(Calc.map(s, d), 0)} mmHg`) : ""; } },
   pat: { t: "PAT", c: "var(--orange)", g: "Observasi",
     body() { const L = [["P", "Penampilan (TICLS)", "Lemas, tidak interaktif, tidak bisa ditenangkan, tatapan kosong"], ["N", "Usaha napas", "Stridor, wheezing, grunting, retraksi, cuping hidung, head bobbing"], ["S", "Sirkulasi kulit", "Pucat, mottled, sianosis"]];
-      return card("pat", "PAT", "Pediatric Assessment Triangle — ketuk untuk menilai", "var(--orange)", L.map(([l, t, h], i) => { const v = p.pat[i], c = v == null ? "var(--gray)" : v ? "var(--orange)" : "var(--green)";
-        return `<button class="pat" data-pat="${i}" style="--c:${c}"><span class="L">${l}</span><span class="t"><b>${t}</b><span>${v === true ? h : v === false ? "Normal" : "Ketuk untuk menilai"}</span></span><span class="pill">${v == null ? "Belum dinilai" : v ? "Abnormal" : "Normal"}</span></button>`; }).join("")); },
-    res() { const k = D.patKey(), lv = D.patLevel(); return k ? res(Calc.patImp[k][0], Calc.patImp[k][1], lv === 3 ? "alert" : lv === 2 ? "warn" : "ok") : res("PAT", "Belum lengkap — nilai ketiga sisi"); } },
-  eskalasi: { t: "Eskalasi", c: "var(--yellow)", g: "Observasi",
-    body: () => card("eskalasi", "Eskalasi", "STABLE · MONITOR · ALERT · CRITICAL", "var(--orange)", ""),
+      return card("pat", "PAT", "Pediatric Assessment Triangle — ketuk untuk menilai", "var(--orange)", L.map(([l, t, h], i) => { const v = p.pat[i], c = v == null ? "var(--na)" : v ? "var(--or)" : "var(--ok)";
+        return `<button class="pat" data-pat="${i}" style="--c:${c}"><span class="L">${l}</span><span class="t"><b>${t}</b><span>${v === true ? h : v === false ? "Normal" : "Ketuk: Normal → Abnormal → kosong"}</span></span><span class="pill">${v == null ? "Belum dinilai" : v ? "Abnormal" : "Normal"}</span></button>`; }).join("")); },
+    res() { const k = D.patKey(), lv = D.patLevel(); return k ? res("Kesan PAT", Calc.patImp[k][1], lv === 3 ? "alert" : lv === 2 ? "warn" : "ok") : res("PAT", "Belum lengkap — nilai ketiga sisi"); } },
+  eskalasi: { t: "Eskalasi", c: "var(--coral)", g: "Observasi",
+    body: () => card("eskalasi", "Eskalasi", "STABLE · MONITOR · ALERT · CRITICAL", "var(--coral)", ""),
     res() { const v = D.vitals(), l = D.level(), red = v.filter(x => x.z === 3), yel = v.filter(x => x.z === 1); let h = "";
-      if (red.length) h += res("TTV merah", red.map(x => `${x.n} ${id(x.v)}`).join(", "), "alert");
-      if (yel.length) h += res("TTV kuning", yel.map(x => `${x.n} ${id(x.v)}`).join(", "), "warn");
+      if (red.length) h += res("Tanda vital merah", red.map(x => `${x.n} ${id(x.v)}`).join(", "), "alert");
+      if (yel.length) h += res("Tanda vital kuning", yel.map(x => `${x.n} ${id(x.v)}`).join(", "), "warn");
       return h + res("Tindakan", D.action(l), l === 3 ? "alert" : l >= 1 ? "warn" : l === 0 ? "ok" : "info")
-        + `<p class="note">STABLE: observasi rutin · MONITOR: TTV kuning · ALERT: PAT 1 sisi abnormal · CRITICAL: TTV merah / PAT ≥ 2 sisi</p>`; } },
+        + `<p class="note">STABLE: observasi rutin · MONITOR: tanda vital kuning · ALERT: PAT 1 sisi abnormal · CRITICAL: tanda vital merah / PAT ≥ 2 sisi</p>`; } },
 };
 const scoreSec = (key, t, c, g, title, sub, items, opts = {}) => SEC[key] = { t, c, g,
   body: () => card(key, title, sub, c, (opts.ind ? indic(opts.ind) : "") + (opts.seg ? seg(...opts.seg) : "") + scoreRows(key, items(), !!opts.choice).replaceAll("var(--c0)", c)),
@@ -508,22 +518,74 @@ scoreSec("cheops", "CHEOPS", "var(--cyan)", "Skor", "CHEOPS", "Nyeri anak 1–7 
 SEC.nrs = { t: "NRS", c: "var(--orange)", g: "Skor",
   body: () => card("nrs", "NRS", "Numerical Rating Scale · dewasa & anak > 3 tahun · 0–10", "var(--orange)", indic("NRS")
     + `<p class="note">“Dari skala 0–10, nyeri yang kamu rasakan sekarang di angka berapa?”</p><div class="nrs">${Array.from({ length: 11 }, (_, v) =>
-      `<button data-nrs="${v}" class="${p.nrs === v ? "on" : ""}" style="--c:${v <= 3 ? "var(--green)" : v <= 6 ? "var(--yellow)" : "var(--red)"}">${v}</button>`).join("")}</div>
+      `<button data-nrs="${v}" class="${p.nrs === v ? "on" : ""}" style="${v <= 3 ? "--c:var(--ok);--k:var(--ok-k)" : v <= 6 ? "--c:var(--wa);--k:var(--wa-k)" : "--c:var(--al);--k:var(--al-k)"}">${v}</button>`).join("")}</div>
       <div class="nrsl"><span>Tidak nyeri</span><span>Sedang</span><span>Terberat</span></div>`),
   res: () => p.nrs == null ? res("NRS", "Belum dinilai — ketuk angka") : (r => res(`NRS ${p.nrs}/10`, r[0], lvSt(r[1])))(INTERP.nrs(p.nrs)) };
 scoreSec("nips", "NIPS", "var(--mint)", "Skor", "NIPS", "Nyeri neonatus · total 0–7 · lembar RSSA", S.nips, { ind: "NIPS", max: 7 });
-scoreSec("cries", "CRIES", "var(--purple)", "Skor", "CRIES", "Nyeri 0–6 bulan · total 0–10 · nyeri bila > 4", S.cries, { ind: "CRIES", max: 10, foot: "Post operasi: gunakan nilai awal sebelum operasi untuk membandingkan TTV." });
+scoreSec("cries", "CRIES", "var(--purple)", "Skor", "CRIES", "Nyeri 0–6 bulan · total 0–10 · nyeri bila > 4", S.cries, { ind: "CRIES", max: 10, foot: "Post operasi: gunakan nilai awal sebelum operasi untuk membandingkan tanda vital." });
 scoreSec("four", "FOUR", "var(--teal)", "Skor", "FOUR score", "Kesadaran · total 0–16 · makin rendah makin berat", S.four);
 scoreSec("cpot", "CPOT", "var(--brown)", "Skor", "CPOT", "Nyeri pasien kritis · dewasa/remaja · total 0–8", () => S.cpot(p.cpotInt), { ind: "CPOT", seg: ["cpotInt", [[false, "Tanpa intubasi"], [true, "Diintubasi"]]], max: 8 });
-const ORDER = ["kebutuhan", "balance", "intake", "gfr", "ttv", "pat", "eskalasi", "gcs", "comfort", "flacc", "cheops", "nrs", "nips", "cries", "four", "cpot"];
+
+/* ---- kekuatan otot, foot drop, dekubitus ---- */
+const MMT = [[5, "Normal — melawan tahanan penuh"], [4, "Melawan gravitasi dan tahanan ringan–sedang"], [3, "Melawan gravitasi, tanpa tahanan"],
+  [2, "Bergerak hanya bila gravitasi dihilangkan (bergeser di bidang datar)"], [1, "Kontraksi otot teraba/terlihat, tanpa gerakan sendi"], [0, "Tidak ada kontraksi sama sekali"]];
+S.otot = () => ["Lengan kanan", "Lengan kiri", "Tungkai kanan", "Tungkai kiri"].map(t => I(t, MMT));
+const FD_AKTIF = [...MMT.map(([v, t]) => [v, t]), ["–", "Tidak bisa dinilai (sedasi / tidak kooperatif)"]];
+const FD_PASIF = [["✓", "Bisa mencapai posisi netral 90° atau lebih"], ["✗", "Terbatas, tidak mencapai 90° (curiga kontraktur)"]];
+const FD_POSISI = [["✓", "Netral — telapak kaki tegak sekitar 90°"], ["✗", "Jatuh ke plantarfleksi (kaki menjulur ke bawah)"]];
+S.footdrop = () => ["kanan", "kiri"].flatMap(k => [I(`Kaki ${k} — dorsofleksi aktif`, FD_AKTIF), I(`Kaki ${k} — dorsofleksi pasif`, FD_PASIF), I(`Kaki ${k} — posisi saat istirahat`, FD_POSISI)]);
+S.braden = () => [
+  I("Mobilitas", [[1, "Tidak bergerak sama sekali — tidak mengubah posisi tubuh/ekstremitas tanpa bantuan"], [2, "Sangat terbatas — kadang mengubah posisi sedikit, tidak mampu sering atau berarti sendiri"], [3, "Sedikit terbatas — sering mengubah posisi sedikit secara mandiri"], [4, "Tidak terbatas — sering mengubah posisi secara berarti tanpa bantuan"]]),
+  I("Aktivitas", [[1, "Tirah baring"], [2, "Hanya di kursi — tidak bisa atau sangat terbatas berjalan"], [3, "Kadang berjalan — jarak sangat pendek, dengan atau tanpa bantuan"], [4, "Terlalu muda untuk berjalan, ATAU sering berjalan"]]),
+  I("Persepsi sensori", [[1, "Sangat terbatas sekali — tidak berespons terhadap nyeri (penurunan kesadaran/sedasi) atau tidak merasakan nyeri di sebagian besar tubuh"], [2, "Sangat terbatas — hanya berespons terhadap rangsang nyeri"], [3, "Sedikit terbatas — berespons terhadap perintah, tapi tidak selalu bisa menyampaikan rasa tidak nyaman"], [4, "Tidak ada gangguan"]]),
+  I("Kelembapan kulit", [[1, "Selalu lembap — keringat, urine atau drainase; basah setiap kali digerakkan"], [2, "Sangat lembap — sering lembap, linen diganti minimal tiap 8 jam"], [3, "Kadang lembap — linen perlu diganti tambahan tiap 12 jam"], [4, "Jarang lembap — linen cukup diganti tiap 24 jam"]]),
+  I("Gesekan & pergeseran", [[1, "Masalah berat — spastik, kontraktur, gatal atau agitasi menyebabkan gesekan hampir terus-menerus"], [2, "Masalah — perlu bantuan sedang sampai maksimal untuk bergerak, sering merosot"], [3, "Masalah potensial — bergerak lemah atau perlu bantuan minimal"], [4, "Tidak ada masalah — bisa mengangkat tubuh sepenuhnya saat berpindah posisi"]]),
+  I("Nutrisi", [[1, "Sangat buruk — puasa dan/atau hanya cairan bening/infus > 5 hari, ATAU albumin < 2,5 g/dL, ATAU tidak pernah menghabiskan makanan"], [2, "Tidak adekuat — diet cair/sonde/nutrisi parenteral tidak mencukupi kebutuhan usia, ATAU albumin < 3 g/dL, ATAU jarang menghabiskan makanan"], [3, "Adekuat — sonde/nutrisi parenteral mencukupi kebutuhan usia, ATAU makan lebih dari separuh porsi"], [4, "Sangat baik — diet normal mencukupi kebutuhan usia, tidak perlu suplemen"]]),
+  I("Perfusi & oksigenasi jaringan", [[1, "Sangat terganggu — hipotensi (MAP < 50 mmHg; < 40 pada bayi baru lahir) ATAU tidak toleran terhadap perubahan posisi"], [2, "Terganggu — normotensi, tetapi SpO₂ < 95% ATAU Hb < 10 g/dL ATAU CRT > 2 detik; pH < 7,40"], [3, "Adekuat — normotensi, SpO₂ kadang < 95% ATAU Hb kadang < 10 g/dL ATAU CRT kadang > 2 detik; pH normal"], [4, "Sangat baik — normotensi, SpO₂ > 95%, Hb normal, CRT < 2 detik"]])];
+SEC.otot = { t: "Kekuatan Otot", c: "var(--grape)", g: "Skor",
+  body: () => card("otot", "Kekuatan otot", "Manual Muscle Testing 0–5 per ekstremitas · pasien harus kooperatif", "var(--grape)", scoreRows("otot", S.otot(), false).replaceAll("var(--c0)", "var(--grape)")),
+  res() { const o = p.otot, f = v => v ?? "–"; if (o.every(v => v == null)) return res("Kekuatan otot", "Belum dinilai — pilih nilai tiap ekstremitas");
+    let h = res("Tulis di kardeks (kanan | kiri)", `Atas ${f(o[0])} | ${f(o[1])} · Bawah ${f(o[2])} | ${f(o[3])}`);
+    if (o.includes(null)) return h + incomplete(o);
+    const nama = ["lengan kanan", "lengan kiri", "tungkai kanan", "tungkai kiri"], lemah = nama.filter((_, i) => o[i] < 5), berat = nama.filter((_, i) => o[i] <= 2);
+    if (!lemah.length) h += res("Kesimpulan", "Kekuatan otot normal di keempat ekstremitas", "ok");
+    else h += res("Kelemahan", lemah.map(n => `${n} ${o[nama.indexOf(n)]}`).join(", "), berat.length ? "alert" : "warn");
+    const ka = o[0] + o[2], ki = o[1] + o[3];
+    if (Math.abs(ka - ki) >= 2) h += res("Asimetris", `Sisi ${ka < ki ? "kanan" : "kiri"} lebih lemah — curiga hemiparesis, lapor dokter`, "alert");
+    return h + `<p class="note">Nilai ≤ 2 = tidak mampu melawan gravitasi. Untuk pasien tersedasi atau bayi yang belum bisa diperintah, nilai lewat gerakan spontan dan catat bahwa penilaian terbatas.</p>`; } };
+SEC.footdrop = { t: "Foot Drop", c: "var(--sage)", g: "Skor",
+  body: () => card("footdrop", "Foot drop", "Penilaian kaki kanan & kiri + faktor risiko", "var(--sage)",
+    `<p class="note" style="margin:0 0 2px 4px;font-weight:700">Faktor risiko (centang yang ada)</p>`
+    + [["fdSedasi", "Sedasi atau pelumpuh otot"], ["fdVent", "Ventilasi mekanik"], ["fdImob", "Tirah baring / imobilisasi lama"], ["fdNeuro", "Gangguan neurologis atau penurunan kesadaran"]]
+      .map(([k, t]) => `<label class="chk sel" style="padding:12px"><input type="checkbox" data-bool="${k}" ${p[k] ? "checked" : ""}> ${t}</label>`).join("")
+    + scoreRows("footdrop", S.footdrop(), true).replaceAll("var(--c0)", "var(--sage)")),
+  res() { const a = p.footdrop, rf = ["fdSedasi", "fdVent", "fdImob", "fdNeuro"].filter(k => p[k]).length; let h = "";
+    h += res("Faktor risiko", `${rf} dari 4${rf ? " — lakukan pencegahan foot drop" : ""}`, rf >= 2 ? "alert" : rf === 1 ? "warn" : "ok");
+    ["kanan", "kiri"].forEach((k, j) => { const [ak, ps, po] = a.slice(j * 3, j * 3 + 3);
+      if (ak == null && ps == null && po == null) { h += res(`Kaki ${k}`, "Belum dinilai"); return; }
+      const temuan = [], aktif = ak == null ? null : FD_AKTIF[ak][0];
+      if (typeof aktif === "number" && aktif <= 2) temuan.push([`foot drop (dorsofleksi aktif ${aktif})`, 2]);
+      if (ps === 1) temuan.push(["curiga kontraktur — dorsofleksi pasif tidak mencapai 90°", 2]);
+      if (po === 1) temuan.push(["posisi plantarfleksi — koreksi ke netral 90°", 1]);
+      const lv = Math.max(0, ...temuan.map(x => x[1]));
+      h += res(`Kaki ${k}`, temuan.length ? temuan.map(x => x[0]).join("; ") : a.slice(j * 3, j * 3 + 3).includes(null) ? "Belum lengkap" : "Tidak ada tanda foot drop", lv === 2 ? "alert" : lv === 1 ? "warn" : a.slice(j * 3, j * 3 + 3).includes(null) ? "info" : "ok"); });
+    return h + `<p class="note">Dorsofleksi aktif ≤ 2 = tidak mampu mengangkat kaki melawan gravitasi. Pencegahan umum: posisi kaki netral 90° dengan penyangga, latihan gerak sendi (ROM) pasif, cek kulit tumit. Sesuaikan dengan kriteria FOOTSAFE-90 unit.</p>`; } };
+SEC.braden = { t: "Dekubitus", c: "var(--rose)", g: "Skor",
+  body: () => card("braden", "Dekubitus · Braden Q", "Risiko luka tekan anak · 7 subskala · total 7–28", "var(--rose)", scoreRows("braden", S.braden(), false).replaceAll("var(--c0)", "var(--rose)")),
+  res() { const b = p.braden, tot = D.total(b); if (tot == null) return incomplete(b);
+    const nama = S.braden().map(x => x.title.toLowerCase()), rendah = nama.filter((_, i) => b[i] <= 2);
+    let h = res(`Total ${tot}/28`, tot <= 16 ? "Berisiko luka tekan (≤ 16)" : "Tidak berisiko menurut batas ≤ 16", tot <= 16 ? "alert" : "ok");
+    if (rendah.length) h += res("Subskala yang perlu intervensi (nilai 1–2)", rendah.join(", "), "warn");
+    return h + `<p class="note">Makin rendah skor, makin tinggi risiko. Batas berisiko ≤ 16 mengikuti Braden Q (Quigley & Curley). Bila unit memakai pembagian tingkat risiko sendiri, ikuti SOP unit.</p>`; } };
+const ORDER = ["kebutuhan", "balance", "intake", "gfr", "ttv", "pat", "eskalasi", "gcs", "comfort", "flacc", "cheops", "nrs", "nips", "cries", "four", "cpot", "otot", "footdrop", "braden"];
 let cur = ARGS.get("section") || "kebutuhan"; if (!SEC[cur]) cur = "kebutuhan";
 
 /* ============ pencarian ============ */
 const FEAT = [
-  ["Holliday-Segar (HS)", "hs maintenance rumatan cairan kalori", "kebutuhan", () => D.w() != null && `${id(Calc.hs(D.w()), 0)} cc/hari · ${id(Calc.hs(D.w()) / 24)} cc/jam`],
+  ["Holliday-Segar", "hs maintenance rumatan cairan kalori", "kebutuhan", () => D.w() != null && `${id(Calc.hs(D.w()), 0)} cc/hari · ${id(Calc.hs(D.w()) / 24)} cc/jam`],
   ["Schofield", "schofield kalori kcal energi gizi", "kebutuhan", () => D.w() != null && D.years() != null && p.male != null && `${id(Calc.schofield(D.w(), D.years(), p.male), 0)} kcal`],
   ["Caldwell-Kennedy (REE)", "caldwell cadwell kennedy ree kalori", "kebutuhan", () => D.w() != null && D.years() != null && `${id(Calc.caldwell(D.w(), D.years()), 0)} kcal`],
-  ["RDA × BB", "rda kalori kebutuhan gizi bb ideal", "kebutuhan", () => D.rdaCalc() && `${id(D.rdaCalc().kcal, 0)} kcal`],
+  ["RDA × berat badan", "rda kalori kebutuhan gizi bb ideal", "kebutuhan", () => D.rdaCalc() && `${id(D.rdaCalc().kcal, 0)} kcal`],
   ["IWL", "iwl insensible water loss rssa neonatus", "kebutuhan", () => D.w() != null && D.tm() != null && `${id(Calc.iwlRate(D.tm(), D.neo()) * D.w(), 0)} cc/hari`],
   ["Intake vs maintenance", "intake persen maintenance overload", "intake", () => { const w = D.w(), i = parse(p.intakePerHour); return w != null && i != null && `${id(i / (Calc.hs(w) / 24) * 100, 0)}%`; }],
   ["Balance cairan", "balance kumulatif output iwl", "balance", () => D.bal() && `${signed(D.bal().bal, 1)} cc`],
@@ -531,7 +593,7 @@ const FEAT = [
   ["GFR (Schwartz) & pRIFLE", "gfr lfg schwartz kreatinin ginjal aki rifle bun ureum renal prerenal", "gfr", () => D.gfr() != null && `${id(D.gfr())} ml/min/1,73 m²`],
   ["Tanda vital & zona warna", "ttv vital hr nadi rr napas td tensi spo2 suhu crt zona", "ttv", () => { const r = D.vitals().filter(x => x.z === 3).map(x => x.n); return r.length && "Merah: " + r.join(", "); }],
   ["MAP", "map mean arterial pressure tekanan darah", "ttv", () => { const s = parse(p.sbp), d = parse(p.dbp); return s != null && d != null && d < s && `${id(Calc.map(s, d), 0)} mmHg`; }],
-  ["PAT", "pat pediatric assessment triangle", "pat", () => D.patKey() && Calc.patImp[D.patKey()][0]],
+  ["PAT", "pat pediatric assessment triangle", "pat", () => D.patKey() && Calc.patImp[D.patKey()][1]],
   ["Eskalasi", "eskalasi lapor dpjp alert critical monitor stable", "eskalasi", () => Calc.statusLabel[D.level()]],
   ["GCS", "gcs glasgow kesadaran", "gcs", () => D.total(p.gcs) != null && `${D.total(p.gcs)}/15 · ${p.gcs.join("/")}`],
   ["COMFORT-B", "comfort sedasi agitasi", "comfort", () => D.total(p.comfort) != null && `${D.total(p.comfort)}`],
@@ -542,13 +604,16 @@ const FEAT = [
   ["CRIES", "cries nyeri neonatus bayi post operasi", "cries", () => D.total(p.cries) != null && `${D.total(p.cries)}/10`],
   ["FOUR score", "four kesadaran batang otak", "four", () => D.total(p.four) != null && `${D.total(p.four)}/16`],
   ["CPOT", "cpot nyeri dewasa remaja", "cpot", () => D.total(p.cpot) != null && `${D.total(p.cpot)}/8`],
+  ["Kekuatan otot", "kekuatan otot mmt motorik hemiparesis lemah", "otot", () => !p.otot.includes(null) && `${p.otot[0]} | ${p.otot[1]} · ${p.otot[2]} | ${p.otot[3]}`],
+  ["Foot drop", "foot drop footdrop kaki jatuh dorsofleksi kontraktur footsafe", "footdrop", () => ""],
+  ["Dekubitus (Braden Q)", "dekubitus decubitus luka tekan pressure injury braden", "braden", () => D.total(p.braden) != null && `${D.total(p.braden)}/28`],
 ];
 
 /* ============ render ============ */
 const $ = s => document.querySelector(s);
 function renderPatient() {
-  $("#patient").innerHTML = `<div class="row">${field("weight", "Berat badan", "kg")}${field("ageYears", "Umur", "th")}${field("ageMonths", "&nbsp;", "bl")}</div>
-    <div class="prow"><div class="seg">${[[true, "L"], [false, "P"]].map(([v, t]) => `<button data-seg="male" data-v="${v}" class="${p.male === v ? "on" : ""}">${t}</button>`).join("")}</div>
+  $("#patient").innerHTML = `<div class="row">${field("weight", "Berat badan", "kg")}${field("ageYears", "Umur", "tahun")}${field("ageMonths", "&nbsp;", "bulan")}</div>
+    <div class="prow"><div class="seg">${[[true, "Laki-laki"], [false, "Perempuan"]].map(([v, t]) => `<button data-seg="male" data-v="${v}" class="${p.male === v ? "on" : ""}">${t}</button>`).join("")}</div>
     <span id="neo"></span><div class="hs" id="hs"></div></div>`;
 }
 function renderGrid() {
@@ -557,13 +622,13 @@ function renderGrid() {
 function renderSection() { $("#section").innerHTML = SEC[cur].body(); refresh(); }
 function refresh() {
   const w = D.w();
-  $("#hs").innerHTML = w != null ? `<b>HS ${id(Calc.hs(w), 0)} cc/hari</b><span>${id(Calc.hs(w) / 24)} cc/jam</span>` : `<span>${p.weight ? "cek BB (kg)" : "isi BB untuk HS"}</span>`;
+  $("#hs").innerHTML = w != null ? `<b>${id(Calc.hs(w), 0)} cc/hari</b><span>Holliday-Segar · ${id(Calc.hs(w) / 24)} cc/jam</span>` : `<span>${p.weight ? "cek berat badan (kg)" : "isi berat badan untuk Holliday-Segar"}</span>`;
   $("#neo").innerHTML = D.tm() === 0 ? `<label class="chk"><input type="checkbox" data-bool="neonate" ${p.neonate ? "checked" : ""}> Neonatus</label>` : "";
   const l = D.level(), b = D.band();
-  $("#status").style.background = `color-mix(in srgb, ${LV[l]} 14%, var(--glass))`;
-  $("#status").innerHTML = `<span class="badge" style="background:${LV[l]}">${Calc.statusLabel[l]}</span>${p.isDemo ? `<span class="demo">CONTOH FIKTIF</span>` : ""}
-    <div class="action" style="color:${l >= 1 ? LV[l] : "inherit"}">${D.action(l)}</div>${b != null ? `<div class="zone">Zona TTV umur ${Calc.bandNames[b]}</div>` : ""}`;
-  $("#warn").innerHTML = D.warnings().map(m => `<div class="glass card" style="padding:10px;margin-top:14px">${res("Cek isian", m, "alert")}</div>`).join("");
+  $("#status").style.background = `color-mix(in srgb, ${LV[l]} 16%, var(--card))`;
+  $("#status").innerHTML = `<span class="badge" style="background:${LV[l]};color:${l === 1 ? "#4A2C2A" : "#fff"}">${Calc.statusLabel[l]}</span>${p.isDemo ? `<span class="demo">CONTOH FIKTIF</span>` : ""}
+    <div class="action" style="color:${l >= 1 ? LVK[l] : "inherit"}">${D.action(l)}</div>${b != null ? `<div class="zone">Zona tanda vital umur ${Calc.bandNames[b]}</div>` : ""}`;
+  $("#warn").innerHTML = D.warnings().map(m => `<div class="glass card" style="padding:10px;margin-top:22px">${res("Cek isian", m, "alert")}</div>`).join("");
   document.querySelectorAll("[data-zone]").forEach(el => { const z = D.zoneOf(el.dataset.zone); el.classList.toggle("warn", z === 1); el.classList.toggle("alert", z === 3); });
   const r = $("#res"); if (r) r.innerHTML = SEC[cur].res();
 }
@@ -587,7 +652,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) { $("#menu").classList.remove("show"); return; }
   if (b.dataset.sec) { cur = b.dataset.sec; renderGrid(); renderSection(); }
   else if (b.dataset.seg) { const k = b.dataset.seg; p[k] = b.dataset.v === "true"; if (k === "male") { renderPatient(); renderSection(); } else renderSection(); }
-  else if (b.dataset.pat) { const i = +b.dataset.pat; p.pat[i] = p.pat[i] == null ? false : !p.pat[i]; renderSection(); }
+  else if (b.dataset.pat) { const i = +b.dataset.pat; p.pat[i] = p.pat[i] == null ? false : p.pat[i] === false ? true : null; renderSection(); }
   else if (b.dataset.nrs) { const v = +b.dataset.nrs; p.nrs = p.nrs === v ? null : v; renderSection(); }
   if (b.id !== "bMore") $("#menu").classList.remove("show");
 });
