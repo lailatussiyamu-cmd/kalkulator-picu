@@ -204,7 +204,7 @@ footer b{display:block;margin-top:8px;letter-spacing:2.5px;font-weight:800;color
 
 <div class="sheet" id="sClear"><div class="glass panel" style="max-width:360px;margin-top:20vh">
   <b style="font-size:17px">Kosongkan semua isian pasien?</b>
-  <p class="note">Berat badan, umur, tanda vital, PAT, cairan, kekuatan otot, foot drop, GFR dan semua skor akan dihapus.</p>
+  <p class="note">Berat badan, umur, tanda vital, PAT, cairan, kekuatan otot, foot drop, GFR, ETT dan semua skor akan dihapus.</p>
   <div class="stack"><button class="btn red" id="cYes">Kosongkan (pasien baru)</button><button class="btn plain" id="cNo">Batal</button></div>
 </div></div>
 
@@ -223,6 +223,7 @@ const ICON = {
   ttv: P(["M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z", "M3.2 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.3"]),
   pat: P(["M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"]),
   eskalasi: P(["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10.3 21a1.9 1.9 0 0 0 3.4 0"]),
+  ett: P(["M5 3v6a8 8 0 0 0 8 8h2", "M10 3v6a3 3 0 0 0 3 3h2", "M3 3h9", "M15 12h4l2 2.5-2 2.5h-4Z"]),
   gcs: P(["M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z", '<circle cx="12" cy="12" r="3"/>']),
   comfort: P(["M2 4v16", "M2 8h18a2 2 0 0 1 2 2v10", "M2 17h20", "M6 8v9"]),
   flacc: P(['<circle cx="12" cy="12" r="10"/>', "M8 14s1.5 2 4 2 4-2 4-2", "M9 9h.01", "M15 9h.01"]),
@@ -299,6 +300,17 @@ const Calc = {
   bunClass: r => r < 10 ? "Renal" : r <= 20 ? "Renal / post renal" : "Prerenal",
 };
 
+// ETT. Umur ≥ 2 th: rumus PALS (tahun penuh). Neonatus: menurut BB (NRP). Bayi 1–24 bl: ukuran tetap.
+// Hasil: [ID cuffed | null, ID uncuffed, dasar]
+Calc.ett = (m, w, neo) => {
+  if (neo) return w == null ? null : [null, w < 1 ? 2.5 : w <= 2 ? 3 : 3.5, "neonatus, menurut berat badan"];
+  if (m < 12) return [w != null && w < 3.5 ? null : 3, 3.5, "bayi < 1 tahun"];
+  if (m < 24) return [3.5, 4, "1–2 tahun"];
+  if (m >= 156) return null;
+  const y = Math.floor(m / 12); return [y / 4 + 3.5, y / 4 + 4, `umur ${y} tahun`]; };
+// Ukuran tersedia tiap 0,5: bila hasil di antara dua ukuran, tampilkan keduanya.
+Calc.ettSizes = v => { const lo = Math.floor(v * 2) / 2, hi = Math.ceil(v * 2) / 2; return lo === hi ? [lo] : [lo, hi]; };
+
 /* ============ skala (sama dengan aplikasi Swift) ============ */
 const I = (title, opts) => ({ title, opts });
 const S = {
@@ -365,7 +377,7 @@ const blank = () => ({ isDemo: false, weight: "", ageYears: "", ageMonths: "", m
   flacc: Array(5).fill(null), cheops: Array(6).fill(null), nips: Array(6).fill(null), cries: Array(5).fill(null),
   cpotInt: false, cpot: Array(4).fill(null), nrs: null,
   otot: Array(4).fill(null), footdrop: Array(6).fill(null), fdSedasi: false, fdVent: false, fdImob: false, fdNeuro: false, braden: Array(7).fill(null),
-  heightCm: "", creatinine: "", ureum: "", premature: false, schwartzK: null, gfrRow: null });
+  ettId: "", heightCm: "", creatinine: "", ureum: "", premature: false, schwartzK: null, gfrRow: null });
 const demo = () => Object.assign(blank(), { isDemo: true, weight: "12", ageYears: "2", ageMonths: "2", male: true, spo2Low: "92", spo2High: "97",
   hr: "172", rr: "62", sbp: "92", dbp: "52", spo2: "95", temp: "37,5", crt: "3", pat: [false, true, true],
   intakePerHour: "76", balIntake: "946", balUrine: "107", balOther: "13", balHours: "11,5",
@@ -504,6 +516,29 @@ const SEC = {
       return h + res("Tindakan", D.action(l), l === 3 ? "alert" : l >= 1 ? "warn" : l === 0 ? "ok" : "info")
         + `<p class="note">STABLE: observasi rutin · MONITOR: tanda vital kuning · ALERT: PAT 1 sisi abnormal · CRITICAL: tanda vital merah / PAT ≥ 2 sisi</p>`; } },
 };
+SEC.ett = { t: "ETT", c: "var(--teal)", g: "Jalan napas",
+  body: () => card("ett", "Ukuran & kedalaman ETT", "Diameter dalam (ID) dan batas bibir / hidung", "var(--teal)", field("ettId", "ID ETT yang dipakai (opsional)", "mm")),
+  res() { const m = D.tm(), w = D.w(), neo = D.neo(); let h = "";
+    const mm = v => id(v, 2), sz = v => Calc.ettSizes(v).map(x => x.toFixed(1).replace(".", ",")).join(" / ") + " mm";
+    const e = m == null ? null : Calc.ett(m, w, neo), y = m == null ? null : Math.floor(m / 12);
+    if (m == null) h += `<p class="note">Isi umur di bagian atas.</p>`;
+    else if (neo && w == null) h += res("ETT neonatus", "isi berat badan");
+    else if (!e) h += res("Umur > 12 tahun", "Di luar rumus anak — tentukan ukuran bersama DPJP", "warn");
+    else { const f = y >= 2, line = (l, v, k) => res(l, f ? `${y}/4 + ${k} = ${mm(v)} → ${sz(v)}` : sz(v));
+      if (e[0] != null) h += line(`Cuffed (${e[2]})`, e[0], "3,5");
+      h += line(`Uncuffed (${e[2]})`, e[1], "4");
+      if (e[0] == null && !neo) h += res("Berat badan < 3,5 kg", "ETT cuffed tidak ditampilkan; bila bayi usia < 28 hari, centang Neonatus", "warn");
+      if (m >= 132) h += res("Umur > 10 tahun", "Rumus kurang akurat — pertimbangkan ukuran tubuh", "warn");
+      if (m === 0 && !neo) h += res("Umur 0 bulan", "Centang Neonatus bila usia < 28 hari", "warn"); }
+    const x = parse(p.ettId), ok = x != null && x >= 2 && x <= 10;
+    if (p.ettId.trim() && !ok) h += res("ID ETT", "tidak masuk akal — isi dalam mm (2–10)", "alert");
+    if (e && neo) h += res("Kedalaman oral (berat badan + 6)", `${id(w + 6)} cm di bibir`);
+    else if (ok) h += res("Kedalaman oral (3 × ID)", `3 × ${mm(x)} = ${id(3 * x)} cm di bibir`);
+    else if (e) { const list = v => Calc.ettSizes(v).map(q => id(3 * q)).join(" / ") + " cm";
+      if (e[0] != null) h += res("Kedalaman oral cuffed (3 × ID)", list(e[0]));
+      h += res("Kedalaman oral uncuffed (3 × ID)", list(e[1])); }
+    if (e && y >= 2) h += res("Kedalaman oral (umur/2 + 12)", `${id(y / 2 + 12)} cm di bibir`) + res("Kedalaman nasal (umur/2 + 15)", `${id(y / 2 + 15)} cm di hidung`);
+    return h + `<p class="note">Umur dihitung tahun penuh. Siapkan juga ukuran 0,5 mm lebih kecil dan lebih besar. Hasil hanya perkiraan awal: konfirmasi posisi dengan kapnografi (EtCO₂), auskultasi dan rontgen dada. Acuan: PALS (umur), NRP (neonatus) — cocokkan dengan SOP unit.</p>`; } };
 const scoreSec = (key, t, c, g, title, sub, items, opts = {}) => SEC[key] = { t, c, g,
   body: () => card(key, title, sub, c, (opts.ind ? indic(opts.ind) : "") + (opts.seg ? seg(...opts.seg) : "") + scoreRows(key, items(), !!opts.choice).replaceAll("var(--c0)", c)),
   res() { const tot = opts.choice ? D.cheopsTotal() : D.total(p[key]); if (tot == null) return incomplete(p[key]);
@@ -577,7 +612,7 @@ SEC.braden = { t: "Dekubitus", c: "var(--rose)", g: "Skor",
     let h = res(`Total ${tot}/28`, tot <= 16 ? "Berisiko luka tekan (≤ 16)" : "Tidak berisiko menurut batas ≤ 16", tot <= 16 ? "alert" : "ok");
     if (rendah.length) h += res("Subskala yang perlu intervensi (nilai 1–2)", rendah.join(", "), "warn");
     return h + `<p class="note">Makin rendah skor, makin tinggi risiko. Batas berisiko ≤ 16 mengikuti Braden Q (Quigley & Curley). Bila unit memakai pembagian tingkat risiko sendiri, ikuti SOP unit.</p>`; } };
-const ORDER = ["kebutuhan", "balance", "intake", "gfr", "ttv", "pat", "eskalasi", "gcs", "comfort", "flacc", "cheops", "nrs", "nips", "cries", "four", "cpot", "otot", "footdrop", "braden"];
+const ORDER = ["kebutuhan", "balance", "intake", "gfr", "ttv", "pat", "eskalasi", "ett", "gcs", "comfort", "flacc", "cheops", "nrs", "nips", "cries", "four", "cpot", "otot", "footdrop", "braden"];
 let cur = ARGS.get("section") || "kebutuhan"; if (!SEC[cur]) cur = "kebutuhan";
 
 /* ============ pencarian ============ */
@@ -595,6 +630,7 @@ const FEAT = [
   ["MAP", "map mean arterial pressure tekanan darah", "ttv", () => { const s = parse(p.sbp), d = parse(p.dbp); return s != null && d != null && d < s && `${id(Calc.map(s, d), 0)} mmHg`; }],
   ["PAT", "pat pediatric assessment triangle", "pat", () => D.patKey() && Calc.patImp[D.patKey()][1]],
   ["Eskalasi", "eskalasi lapor dpjp alert critical monitor stable", "eskalasi", () => Calc.statusLabel[D.level()]],
+  ["Ukuran & kedalaman ETT", "ett endotracheal tube intubasi cuffed uncuffed kedalaman jalan napas", "ett", () => { const m = D.tm(), e = m != null && Calc.ett(m, D.w(), D.neo()); return e && `ID ${id(e[0] ?? e[1], 2)} ${e[0] != null ? "cuffed" : "uncuffed"}`; }],
   ["GCS", "gcs glasgow kesadaran", "gcs", () => D.total(p.gcs) != null && `${D.total(p.gcs)}/15 · ${p.gcs.join("/")}`],
   ["COMFORT-B", "comfort sedasi agitasi", "comfort", () => D.total(p.comfort) != null && `${D.total(p.comfort)}`],
   ["FLACC", "flacc nyeri pain", "flacc", () => D.total(p.flacc) != null && `${D.total(p.flacc)}/10`],
