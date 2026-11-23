@@ -98,6 +98,16 @@ body{font:15px/1.35 var(--font);color:var(--text);background:var(--bg);-webkit-f
 .seg button{border:0;background:none;color:var(--text);font:700 13px var(--font);padding:7px 14px;border-radius:11px;cursor:pointer}
 .seg button.on{background:var(--card);box-shadow:var(--clay-sm);color:var(--pink)}
 .patient .seg{background:rgba(255,255,255,.28)}.patient .seg button{color:#fff}.patient .seg button.on{background:#FFF8EE;color:var(--pink)}
+.patient .f label{display:flex;align-items:center;gap:6px;margin-left:2px;cursor:pointer;white-space:nowrap}
+.pic{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--c);color:#fff;box-shadow:var(--clay-sm)}
+.pic svg{width:18px;height:18px}
+.sex button{display:flex;align-items:center;gap:7px;padding:4px 12px 4px 5px;border-radius:99px;transition:.15s}
+.patient .seg.sex{border-radius:99px}
+.sex svg{width:34px;height:34px;flex:none;transition:.2s}
+.sex button:not(.on) svg{opacity:.8;transform:scale(.88)}
+.sex button:active{transform:scale(.95)}
+.patient .sex button.on[data-v="true"]{color:#1E6FB0}.patient .sex button.on[data-v="false"]{color:#C93D7A}
+@media (max-width:420px){.patient .f label{font-size:11px;gap:5px}.pic{width:24px;height:24px;border-radius:8px}.pic svg{width:15px;height:15px}}
 .seg.full{display:flex}.seg.full button{flex:1}
 .hs{margin-left:auto;text-align:right}
 .hs b{display:block;color:#fff;font:800 17px var(--font);font-variant-numeric:tabular-nums}
@@ -213,6 +223,9 @@ footer b{display:block;margin-top:8px;letter-spacing:2.5px;font-weight:800;color
 /* ============ ikon (garis tipis) ============ */
 const P = d => d.map(x => x.startsWith("<") ? x : `<path d="${x}"/>`).join("");
 const ICON = {
+  bb: P(['<rect x="3" y="3" width="18" height="18" rx="5"/>', "M7.5 11a5.2 5.2 0 0 1 9 0Z", "m12 11 1.6-2.4", "M9 17h6"]),
+  umur: P(["M4 21h16", "M5 21v-7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v7", "M5 16.5c1.2 1.3 2.3 1.3 3.5 0s2.3-1.3 3.5 0 2.3 1.3 3.5 0 2.3-1.3 3.5 0", "M12 12V8", "M12 5.2c-1-1-.4-2 0-2.7.4.7 1 1.7 0 2.7Z"]),
+  bulan: P(['<rect x="3" y="4.5" width="18" height="16.5" rx="4"/>', "M3 10h18", "M8 2.5v4", "M16 2.5v4", "M12 18.2c-2-1.2-2.7-2.2-2.7-3.2a1.4 1.4 0 0 1 2.7-.5 1.4 1.4 0 0 1 2.7.5c0 1-.7 2-2.7 3.2Z"]),
   search: P(['<circle cx="11" cy="11" r="7"/>', "m20 20-3.5-3.5"]),
   trash: P(["M3 6h18", "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"]),
   more: P(['<circle cx="5" cy="12" r="1.3"/>', '<circle cx="12" cy="12" r="1.3"/>', '<circle cx="19" cy="12" r="1.3"/>']),
@@ -238,6 +251,11 @@ const ICON = {
   braden: P(['<rect x="1.5" y="7.5" width="21" height="9" rx="4.5" transform="rotate(-45 12 12)"/>', '<rect x="8.5" y="8.5" width="7" height="7" rx="1.5" transform="rotate(-45 12 12)"/>', '<circle cx="12" cy="10.6" r=".5"/>', '<circle cx="12" cy="13.4" r=".5"/>', '<circle cx="10.6" cy="12" r=".5"/>', '<circle cx="13.4" cy="12" r=".5"/>']),
 };
 const svg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg>`;
+
+// Wajah anak laki-laki & perempuan (berwarna) untuk tombol jenis kelamin.
+const FACE = (bg, hair, extra) => `<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="${bg}"/>${hair}<circle cx="9.5" cy="23" r="2.6" fill="#F6C9A4"/><circle cx="30.5" cy="23" r="2.6" fill="#F6C9A4"/><circle cx="20" cy="22" r="10.5" fill="#FFDDBD"/>${extra}<circle cx="16" cy="23" r="1.5" fill="#4A2C2A"/><circle cx="24" cy="23" r="1.5" fill="#4A2C2A"/><circle cx="13.4" cy="26.4" r="1.9" fill="#F79CB4" opacity=".75"/><circle cx="26.6" cy="26.4" r="1.9" fill="#F79CB4" opacity=".75"/><path d="M17 27.2q3 2.8 6 0" fill="none" stroke="#4A2C2A" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+const BOY = FACE("#BFE3FB", "", '<path d="M9.3 21.5C8.6 13.4 13.6 9 20.4 9c6.600 0 11 4.600 10.300 12.500-1.700-1.200-2.700-2.700-3.200-4.500-3.500 1.500-8.500 1.600-12.500.2-.6 2-2.900 3.700-5.700 4.300Z" fill="#6B4130"/><path d="M19 9.500c.2-2 1.600-3.200 3.600-3.300-.8 1-.9 2-.6 3.300Z" fill="#6B4130"/>');
+const GIRL = FACE("#FFD0E0", '<circle cx="7.500" cy="17" r="4.600" fill="#7A4632"/><circle cx="32.500" cy="17" r="4.600" fill="#7A4632"/>', '<path d="M9.200 22C8.300 13.500 13.300 9 20 9s11.700 4.500 10.800 13c-5-.6-9-3-10.800-7-1.800 4-5.800 6.400-10.800 7Z" fill="#7A4632"/><path d="M20 9.200 14.600 6.200q-1.200 3 0 6ZM20 9.200l5.400-3q1.200 3 0 6Z" fill="#F2759F"/><circle cx="20" cy="9.200" r="1.800" fill="#E8609A"/>');
 
 /* ============ angka ============ */
 function parse(raw) {
@@ -647,9 +665,10 @@ const FEAT = [
 
 /* ============ render ============ */
 const $ = s => document.querySelector(s);
+const pField = (k, label, unit, ic, c) => field(k, label, unit).replace("<label>", `<label for="in-${k}"><span class="pic" style="--c:${c}">${svg(ic)}</span>`).replace("<input ", `<input id="in-${k}" `);
 function renderPatient() {
-  $("#patient").innerHTML = `<div class="row">${field("weight", "Berat badan", "kg")}${field("ageYears", "Umur", "tahun")}${field("ageMonths", "&nbsp;", "bulan")}</div>
-    <div class="prow"><div class="seg">${[[true, "Laki-laki"], [false, "Perempuan"]].map(([v, t]) => `<button data-seg="male" data-v="${v}" class="${p.male === v ? "on" : ""}">${t}</button>`).join("")}</div>
+  $("#patient").innerHTML = `<div class="row">${pField("weight", "Berat badan", "kg", "bb", "var(--orange)")}${pField("ageYears", "Umur", "tahun", "umur", "var(--pink)")}${pField("ageMonths", "Bulan", "bulan", "bulan", "var(--teal)")}</div>
+    <div class="prow"><div class="seg sex">${[[true, "Laki-laki", BOY], [false, "Perempuan", GIRL]].map(([v, t, f]) => `<button data-seg="male" data-v="${v}" aria-pressed="${p.male === v}" class="${p.male === v ? "on" : ""}">${f}${t}</button>`).join("")}</div>
     <span id="neo"></span><div class="hs" id="hs"></div></div>`;
 }
 function renderGrid() {
