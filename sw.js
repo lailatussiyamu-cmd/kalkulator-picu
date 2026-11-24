@@ -1,6 +1,6 @@
 // Simpan semua file aplikasi supaya tetap jalan tanpa internet.
 // Naikkan nomor versi setiap kali isi aplikasi berubah.
-const CACHE = "kalkulator-picu-v9";
+const CACHE = "kalkulator-picu-v10";
 const FILES = ["./", "./index.html", "./manifest.json", "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {

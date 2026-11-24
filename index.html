@@ -204,7 +204,7 @@ footer b{display:block;margin-top:8px;letter-spacing:2.5px;font-weight:800;color
   <div class="glass grid" id="grid"></div>
   <div class="glass card" id="section"></div>
 
-  <footer>Alat bantu hitung untuk latihan. Batas zona = tabel APLS di kardeks; IWL = lembar diit RSSA. Keputusan klinis tetap mengikuti DPJP dan SOP unit.<b>— the urbanmama —</b></footer>
+  <footer>Alat bantu hitung untuk latihan. Batas zona = tabel APLS di kardeks; IWL = acuan RSSA. Keputusan klinis tetap mengikuti DPJP dan SOP unit.<b>— the urbanmama —</b></footer>
 </div>
 
 <div class="sheet" id="sSearch"><div class="glass panel">
@@ -326,9 +326,10 @@ Calc.ett = (m, w, neo) => {
   if (m < 24) return [3.5, 4, "1–2 tahun"];
   if (m >= 156) return null;
   const y = Math.floor(m / 12); return [y / 4 + 3.5, y / 4 + 4, `umur ${y} tahun`]; };
-// ETT dewasa: [ID terkecil, terbesar, kedalaman oral, kedalaman nasal] menurut jenis kelamin.
-Calc.ettAdult = male => male == null ? null : male ? [7.5, 8, 23, 26] : [7, 7.5, 21, 24];
+// ETT dewasa: [ID terkecil, terbesar, kedalaman oral] menurut jenis kelamin.
+Calc.ettAdult = male => male == null ? null : male ? [7.5, 8, 23] : [7, 7.5, 21];
 Calc.ettChula = h => .1 * h + 4; // kedalaman oral dewasa dari tinggi badan (cm)
+Calc.ettChulaNasal = h => .1 * h + 9; // kedalaman nasal dewasa dari tinggi badan (Techanivate)
 // Ukuran tersedia tiap 0,5: bila hasil di antara dua ukuran, tampilkan keduanya.
 Calc.ettSizes = v => { const lo = Math.floor(v * 2) / 2, hi = Math.ceil(v * 2) / 2; return lo === hi ? [lo] : [lo, hi]; };
 
@@ -414,7 +415,7 @@ const D = {
   // Umur dewasa hanya dipakai ETT; kalkulator lain tetap 0–18 tahun.
   over18: () => { const v = parse(p.ageYears); return v != null && Number.isInteger(v) && v > 18 && v <= 120; },
   tooOld: () => parse(p.ageYears) > 18, // rumus anak disembunyikan, termasuk untuk umur tak valid > 18
-  hs: () => { const w = D.w(); return w == null || D.tooOld() ? null : Calc.hs(w); },
+  hs: () => { const w = D.w(); return w == null || D.tooOld() || D.neo() ? null : Calc.hs(w); },
   ettAge: () => D.over18() && D.months() != null ? parse(p.ageYears) * 12 + D.months() : D.tm(),
   neo: () => p.neonate && D.tm() === 0,
   band: () => { const m = D.tm(); return m == null ? null : Calc.band(m); },
@@ -486,7 +487,8 @@ const SEC = {
         `<div class="row">${field("rda", "RDA (kosong = otomatis)", "kcal/kg", null, a ? `${a[0]} otomatis` : "–")}${field("bbIdeal", "Berat badan ideal (opsional)", "kg")}</div>`); },
     res() { const w = D.w(), y = D.years(), m = D.tm(); if (w == null) return `<p class="note">Isi berat badan & umur di bagian atas.</p>`;
       if (D.tooOld()) return CHILD_ONLY;
-      const hs = D.hs(); let h = res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
+      const hs = D.hs(); let h = hs == null ? res("Holliday-Segar", "tidak dihitung untuk neonatus — ikuti advis cairan neonatus", "warn") : res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
+      if (m === 0 && !D.neo()) h += res("Umur 0 bulan", "Centang Neonatus bila usia < 28 hari", "warn");
       h += res("Schofield", y != null && p.male != null ? `${id(Calc.schofield(w, y, p.male), 0)} kcal` : "isi umur & jenis kelamin");
       h += res("Caldwell-Kennedy (REE)", y != null ? `${id(Calc.caldwell(w, y), 0)} kcal` : "isi umur");
       const r = D.rdaCalc();
@@ -506,7 +508,7 @@ const SEC = {
         + res("Balance ÷ berat badan", `${signed(b.perKg, 2)} cc/kg`) + res(`Balance ÷ berat badan ÷ ${id(h)} jam`, `${signed(b.perKgH, 2)} cc/kg/jam`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
   intake: { t: "% Maintenance", c: "var(--blue)", g: "Cairan",
     body: () => card("intake", "Intake vs maintenance", "Semua jalur: infus + sonde + obat", "var(--blue)", field("intakePerHour", "Total intake", "cc/jam")),
-    res() { const w = D.w(), i = parse(p.intakePerHour); if (D.tooOld()) return CHILD_ONLY; if (w == null || i == null) return ""; const pct = i / (D.hs() / 24) * 100;
+    res() { const w = D.w(), i = parse(p.intakePerHour); if (D.tooOld()) return CHILD_ONLY; if (D.neo()) return res("Dari maintenance", "tidak dihitung untuk neonatus", "warn"); if (w == null || i == null) return ""; const pct = i / (D.hs() / 24) * 100;
       return res("Dari maintenance", `${id(pct, 0)}%`, pct > 100 ? "alert" : "ok"); } },
   gfr: { t: "GFR", c: "var(--yellow)", g: "Ginjal",
     body() { const m = D.tm(); const autoK = m == null ? 0.55 : Calc.defK(m, p.premature, p.male), k = p.schwartzK ?? autoK, ar = m == null ? null : Calc.gfrRow(m);
@@ -520,7 +522,8 @@ const SEC = {
       else { const k = p.schwartzK ?? Calc.defK(m, p.premature, p.male), g = D.gfr();
         if (g == null) h += res("GFR", "isi tinggi badan & kreatinin");
         else { h += res(`GFR (k ${id(k, 3)})`, `${id(g)} ml/min/1,73 m²`); const row = p.gfrRow ?? Calc.gfrRow(m);
-          if (row == null) h += res("Penurunan GFR", "pilih nilai normal usia");
+          if (D.neo() || (row != null && row <= 2)) h += res("pRIFLE", "tidak dinilai pada neonatus — bandingkan dengan nilai normal usia", "warn");
+          else if (row == null) h += res("Penurunan GFR", "pilih nilai normal usia");
           else { const lo = Calc.gfrLower(row), dec = lo > 0 && g < lo ? (lo - g) / lo * 100 : 0, r = Calc.pRIFLE(dec, g);
             h += res(`Batas bawah ${Calc.gfrN[row][0]} (${row === 9 ? "rerata" : "rerata − simpang baku"})`, id(lo)) + res("Penurunan GFR", dec > 0 ? `${id(dec)}%` : "tidak menurun", dec >= 25 ? "alert" : "ok")
               + res("pRIFLE", r[0], r[1] >= 2 ? "alert" : r[1] === 1 ? "warn" : "ok"); } } }
@@ -556,8 +559,8 @@ SEC.ett = { t: "ETT", c: "var(--teal)", g: "Jalan napas",
       if (m < 216) h += res("Umur 13–17 tahun", "Rujukan dewasa — hanya bila postur sudah dewasa, tentukan bersama DPJP", "warn");
       if (!a) h += res("ETT dewasa", "pilih jenis kelamin");
       else { const s = p.male ? "laki-laki" : "perempuan";
-        h += res(`Cuffed dewasa (${s})`, `${id(a[0])}–${id(a[1])} mm`) + res(`Kedalaman oral (${s})`, `${a[2]} cm di gigi seri`) + res(`Kedalaman nasal (${s})`, `${a[3]} cm di hidung`); }
-      if (p.heightCm.trim()) h += hc != null && hc >= 130 && hc <= 220 ? res("Kedalaman oral (Chula: 0,1 × TB + 4)", `${id(Calc.ettChula(hc))} cm di sudut mulut`) : res("Tinggi badan", "untuk rumus dewasa isi 130–220 cm", "alert"); }
+        h += res(`Cuffed dewasa (${s})`, `${id(a[0])}–${id(a[1])} mm`) + res(`Kedalaman oral (${s})`, `${a[2]} cm di gigi seri`); }
+      if (p.heightCm.trim()) h += hc != null && hc >= 130 && hc <= 220 ? res("Kedalaman oral (Chula: 0,1 × TB + 4)", `${id(Calc.ettChula(hc))} cm di sudut mulut`) + res("Kedalaman nasal (Chula: 0,1 × TB + 9)", `${id(Calc.ettChulaNasal(hc))} cm di hidung`) : res("Tinggi badan", "untuk rumus dewasa isi 130–220 cm", "alert"); }
     else { const f = y >= 2, line = (l, v, k) => res(l, f ? `${y}/4 + ${k} = ${mm(v)} → ${sz(v)}` : sz(v));
       if (e[0] != null) h += line(`Cuffed (${e[2]})`, e[0], "3,5");
       h += line(`Uncuffed (${e[2]})`, e[1], "4");
@@ -693,7 +696,7 @@ function renderGrid() {
 function renderSection() { $("#section").innerHTML = SEC[cur].body(); refresh(); }
 function refresh() {
   const hs = D.hs();
-  $("#hs").innerHTML = D.tooOld() ? `<span>Holliday-Segar: hanya umur 0–18 tahun</span>` : hs != null ? `<b>${id(hs, 0)} cc/hari</b><span>Holliday-Segar · ${id(hs / 24)} cc/jam</span>` : `<span>${p.weight ? "cek berat badan (kg)" : "isi berat badan untuk Holliday-Segar"}</span>`;
+  $("#hs").innerHTML = D.tooOld() ? `<span>Holliday-Segar: hanya umur 0–18 tahun</span>` : D.neo() ? `<span>Holliday-Segar: tidak untuk neonatus</span>` : hs != null ? `<b>${id(hs, 0)} cc/hari</b><span>Holliday-Segar · ${id(hs / 24)} cc/jam</span>` : `<span>${p.weight ? "cek berat badan (kg)" : "isi berat badan untuk Holliday-Segar"}</span>`;
   $("#neo").innerHTML = D.tm() === 0 ? `<label class="chk"><input type="checkbox" data-bool="neonate" ${p.neonate ? "checked" : ""}> Neonatus</label>` : "";
   const l = D.level(), b = D.band();
   $("#status").style.background = `color-mix(in srgb, ${LV[l]} 16%, var(--card))`;

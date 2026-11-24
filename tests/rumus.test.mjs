@@ -68,8 +68,10 @@ test("ETT anak, bayi, neonatus", () => {
   same(Calc.ettSizes(4.25), [4, 4.5]); same(Calc.ettSizes(4), [4]);
 });
 test("ETT dewasa", () => {
-  same(Calc.ettAdult(true), [7.5, 8, 23, 26]); same(Calc.ettAdult(false), [7, 7.5, 21, 24]); assert.equal(Calc.ettAdult(null), null);
-  near(Calc.ettChula(170), 21);
+  same(Calc.ettAdult(true), [7.5, 8, 23]); same(Calc.ettAdult(false), [7, 7.5, 21]); assert.equal(Calc.ettAdult(null), null);
+  near(Calc.ettChula(170), 21); near(Calc.ettChulaNasal(170), 26);
+  assert.match(text({ ageYears: "40", male: true, heightCm: "170" }, "ett"), /26 cm di hidung/);
+  assert.doesNotMatch(text({ ageYears: "40", male: true }, "ett"), /nasal/);
   const a = text({ ageYears: "40", male: true, heightCm: "170" }, "ett"); assert.match(a, /7,5–8 mm/); assert.match(a, /21 cm di sudut mulut/);
   assert.match(text({ ageYears: "15", male: true }, "ett"), /Rujukan dewasa/);
   assert.match(text({ ageYears: "12" }, "ett"), /6,5 mm/);
@@ -91,6 +93,20 @@ test("umur 18 dan umur kosong tetap dihitung", () => {
   assert.match(text({ ageYears: "18", weight: "60", male: true }, "kebutuhan"), /2300 kcal/);
   assert.match(text({ weight: "12" }, "kebutuhan"), /1100 kcal/); assert.match(els["#hs"].innerHTML, /1100 cc\/hari/);
   assert.match(text({ weight: "12", intakePerHour: "45,83" }, "intake"), /100%/);
+});
+test("kardeks F6.1 simulasi (11 kg, 3 th 2 bl, P): HS 1050, Schofield 709, diuresis 2", () => {
+  const o = { weight: "11", ageYears: "3", ageMonths: "2", male: false };
+  const t = text(o, "kebutuhan"); assert.match(t, /1050 kcal/); assert.match(t, /709 kcal/);
+  assert.match(text({ ...o, balIntake: "130", balUrine: "44", balHours: "2" }, "balance"), /Diuresis 2 cc\/kg\/jam/);
+});
+test("neonatus: Holliday-Segar, % maintenance dan pRIFLE tidak dihitung", () => {
+  const n = { weight: "3", ageMonths: "0", neonate: true, male: true, intakePerHour: "10" };
+  const t = text(n, "kebutuhan"); assert.match(t, /tidak dihitung untuk neonatus/); assert.doesNotMatch(t, /300 cc/); assert.match(t, /150 cc\/hari/);
+  assert.doesNotMatch(els["#hs"].innerHTML, /\d cc/); assert.doesNotMatch(text(n, "intake"), /%/);
+  for (const g of [{ ...n }, { ageMonths: "0" }, { ageMonths: "1" }, { ageMonths: "0" }].map((x, i) => ({ ...x, heightCm: "50", creatinine: "0,9", gfrRow: [0, 1, 2, 0][i] }))) {
+    const r = text(g, "gfr"); assert.match(r, /GFR \(k/); assert.match(r, /tidak dinilai pada neonatus/); assert.doesNotMatch(r, /Failure pRIFLE|F – Failure/); }
+  assert.match(text({ ageYears: "5", heightCm: "100", creatinine: "2" }, "gfr"), /F – Failure/);
+  for (const x of FEAT.filter(x => ["Holliday-Segar", "Intake vs maintenance"].includes(x[0]))) { ctx.T.set(n, "kebutuhan"); assert.ok(!x[3](), x[0]); }
 });
 test("pesan umur", () => {
   ctx.T.set({ ageYears: "121" }, "ett"); assert.match(D.warnings().join(), /sampai 120/);
