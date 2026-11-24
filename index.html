@@ -289,7 +289,7 @@ const Calc = {
   iwlLabel: (m, neo) => neo ? "neonatus" : m <= 12 ? "1–12 bulan" : m <= 60 ? "> 1–5 tahun" : "> 5 tahun",
   balance(i, u, o, h, w, m, neo) { if (!(h > 0 && w > 0)) return null;
     const iwl = Calc.iwlRate(m, neo) * w / 24 * h, out = u + o + iwl, bal = i - out;
-    return { iwl, out, bal, perKg: bal / w, perKgH: bal / w / h, diuresis: u / w / h }; },
+    return { iwl, out, bal, perKg: bal / w, tbw: bal / w / 6, diuresis: u / w / h }; },
   bandNames: ["< 1 tahun", "1–2 tahun", "2–5 tahun", "5–12 tahun", "> 12 tahun"],
   hr: [[110, 160], [100, 150], [95, 140], [80, 120], [60, 100]],
   rr: [[30, 40], [25, 35], [25, 30], [20, 25], [15, 20]],
@@ -505,7 +505,7 @@ const SEC = {
     res() { if (D.tooOld()) return CHILD_ONLY; const b = D.bal(); if (!b) return res("Balance", D.w() == null || D.tm() == null ? "isi berat badan & umur di bagian atas" : "isi intake & lama blok");
       const h = parse(p.balHours); let s = p.balUrine.trim() ? "" : res("Urine kosong", "dihitung 0 cc — pastikan memang anuria", "warn");
       return s + res(`IWL ${id(h)} jam`, `${id(b.iwl)} cc`) + res("Total output (+ IWL)", `${id(b.out)} cc`) + res("Balance", `${signed(b.bal, 1)} cc`, b.bal > 0 ? "warn" : "ok")
-        + res("Balance ÷ berat badan", `${signed(b.perKg, 2)} cc/kg`) + res(`Balance ÷ berat badan ÷ ${id(h)} jam`, `${signed(b.perKgH, 2)} cc/kg/jam`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
+        + res("Balance ÷ berat badan", `${signed(b.perKg, 2)} cc/kg`) + res("Balance ÷ berat badan ÷ 6 (% total body water)", `${signed(b.tbw, 2)} % TBW`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
   intake: { t: "% Maintenance", c: "var(--blue)", g: "Cairan",
     body: () => card("intake", "Intake vs maintenance", "Semua jalur: infus + sonde + obat", "var(--blue)", field("intakePerHour", "Total intake", "cc/jam")),
     res() { const w = D.w(), i = parse(p.intakePerHour); if (D.tooOld()) return CHILD_ONLY; if (D.neo()) return res("Dari maintenance", "tidak dihitung untuk neonatus", "warn"); if (w == null || i == null) return ""; const pct = i / (D.hs() / 24) * 100;

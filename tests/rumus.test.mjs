@@ -41,7 +41,7 @@ test("RDA per umur, termasuk batas", () => {
 test("IWL RSSA", () => { assert.equal(Calc.iwlRate(0, true), 50); for (const [m, v] of [[12, 40], [13, 30], [60, 30], [61, 20]]) assert.equal(Calc.iwlRate(m, false), v); });
 test("Balance", () => {
   const b = Calc.balance(500, 240, 10, 12, 12, 24, false);
-  near(b.iwl, 180); near(b.out, 430); near(b.bal, 70); near(b.perKg, 5.833); near(b.diuresis, 1.667);
+  near(b.iwl, 180); near(b.out, 430); near(b.bal, 70); near(b.perKg, 5.833); near(b.tbw, 0.972); near(b.diuresis, 1.667);
   assert.equal(Calc.balance(500, 0, 0, 0, 12, 24, false), null);
 });
 test("GFR Schwartz, konstanta k, pRIFLE", () => {
