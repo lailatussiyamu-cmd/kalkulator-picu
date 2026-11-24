@@ -7,3 +7,7 @@ Buka di iPhone lewat Safari → Share → **Add to Home Screen**. Setelah dibuka
 Alat bantu hitung untuk latihan. Keputusan klinis tetap mengikuti DPJP dan SOP unit.
 
 — the urbanmama —
+
+## Tes rumus
+
+Sebelum mengubah atau menerbitkan aplikasi, jalankan `node --test` (Node 20+, tanpa instalasi). Tes memuat kode asli dari `index.html` dan membandingkannya dengan angka di `tests/rumus.test.mjs`.

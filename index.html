@@ -413,6 +413,8 @@ const D = {
   tm: () => { const y = D.years(), m = D.months(); return y == null || m == null ? null : y * 12 + m; },
   // Umur dewasa hanya dipakai ETT; kalkulator lain tetap 0–18 tahun.
   over18: () => { const v = parse(p.ageYears); return v != null && Number.isInteger(v) && v > 18 && v <= 120; },
+  tooOld: () => parse(p.ageYears) > 18, // rumus anak disembunyikan, termasuk untuk umur tak valid > 18
+  hs: () => { const w = D.w(); return w == null || D.tooOld() ? null : Calc.hs(w); },
   ettAge: () => D.over18() && D.months() != null ? parse(p.ageYears) * 12 + D.months() : D.tm(),
   neo: () => p.neonate && D.tm() === 0,
   band: () => { const m = D.tm(); return m == null ? null : Calc.band(m); },
@@ -431,7 +433,7 @@ const D = {
   action: l => l === -1 ? "Isi tanda vital dan/atau PAT untuk menilai status" : l === 0 ? "Observasi rutin sesuai jadwal" : Calc.esc[l],
   rdaAuto: () => { const m = D.tm(); return m == null ? null : Calc.rda(m, p.male); },
   bbi: () => { const v = parse(p.bbIdeal); return v != null && v >= .3 && v <= 150 ? v : null; },
-  rdaCalc() { const w = D.w(); if (w == null) return null; const man = parse(p.rda), auto = D.rdaAuto();
+  rdaCalc() { const w = D.w(); if (w == null || D.tooOld()) return null; const man = parse(p.rda), auto = D.rdaAuto();
     const perKg = man ?? auto?.[0]; if (perKg == null) return null; const bbi = D.bbi(), base = bbi ?? w;
     return { perKg, src: man != null ? "diisi manual" : `otomatis ${auto[1]}`, base, baseLabel: bbi != null ? "berat badan ideal" : "berat badan aktual", kcal: perKg * base }; },
   total: a => a.includes(null) ? null : a.reduce((x, y) => x + y, 0),
@@ -444,7 +446,7 @@ const D = {
   warnings() { const o = [];
     if (p.weight && D.w() == null) o.push(`Berat badan ${p.weight} tidak masuk akal — isi dalam kg (0,3–150), bukan gram.`);
     if (D.over18()) { if (cur !== "ett") o.push("Umur > 18 tahun hanya didukung di ETT — kalkulator lain memakai rumus anak (0–18 tahun)."); }
-    else if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18. Bayi: isi di kotak bulan (misalnya 0 tahun 6 bulan).");
+    else if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18 (ETT: sampai 120). Bayi: isi di kotak bulan (misalnya 0 tahun 6 bulan).");
     if (D.months() == null) o.push("Umur bulan harus bilangan bulat 0–11 (12 bulan = 1 tahun 0 bulan).");
     const s = parse(p.sbp), d = parse(p.dbp); if (s != null && d != null && d >= s) o.push(`Diastol (${id(d, 0)}) ≥ sistol (${id(s, 0)}) — cek ulang tekanan darah.`);
     return o; },
@@ -463,6 +465,7 @@ const LVK = { "-1": "var(--na-k)", 0: "var(--ok-k)", 1: "var(--wa-k)", 2: "var(-
 const ST = { ok: ["var(--ok)", "var(--ok-k)"], warn: ["var(--wa)", "var(--wa-k)"], alert: ["var(--al)", "var(--al-k)"], info: ["var(--inf)", "var(--inf-k)"] };
 const lvSt = l => l >= 2 ? "alert" : l === 1 ? "warn" : "ok";
 const res = (l, v, st = "info") => `<div class="res${String(v).length > 34 ? " long" : ""}" style="--c:${ST[st][0]};--k:${ST[st][1]}"><span class="dot"></span><span class="l">${esc(l)}</span><span class="v">${esc(v)}</span></div>`;
+const CHILD_ONLY = `<p class="note">Rumus ini hanya untuk umur 0–18 tahun — tidak dihitung.</p>`;
 const field = (k, label, unit, zone, ph = "–") => `<div class="f"><label>${label}</label><div class="inp" ${zone ? `data-zone="${zone}"` : ""}><input data-k="${k}" inputmode="decimal" placeholder="${esc(ph)}" value="${esc(p[k])}"><small>${unit}</small></div></div>`;
 const seg = (k, opts) => `<div class="seg full">${opts.map(([v, t]) => `<button data-seg="${k}" data-v="${v}" class="${p[k] === v ? "on" : ""}">${t}</button>`).join("")}</div>`;
 const card = (key, title, sub, color, body) => `<div class="ch" style="--c:${color}"><div class="ic">${svg(key)}</div><div><b>${title}</b><span>${sub}</span></div></div><div class="stack">${body}<div id="res" class="stack"></div></div>`;
@@ -482,7 +485,8 @@ const SEC = {
       return card("kebutuhan", "Kebutuhan cairan & kalori", "Blok Requirements & Plan kardeks", "var(--teal)",
         `<div class="row">${field("rda", "RDA (kosong = otomatis)", "kcal/kg", null, a ? `${a[0]} otomatis` : "–")}${field("bbIdeal", "Berat badan ideal (opsional)", "kg")}</div>`); },
     res() { const w = D.w(), y = D.years(), m = D.tm(); if (w == null) return `<p class="note">Isi berat badan & umur di bagian atas.</p>`;
-      const hs = Calc.hs(w); let h = res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
+      if (D.tooOld()) return CHILD_ONLY;
+      const hs = D.hs(); let h = res("Holliday-Segar", `${id(hs, 0)} kcal (cairan ${id(hs, 0)} cc)`) + res("Maintenance per jam", `${id(hs / 24)} cc/jam`);
       h += res("Schofield", y != null && p.male != null ? `${id(Calc.schofield(w, y, p.male), 0)} kcal` : "isi umur & jenis kelamin");
       h += res("Caldwell-Kennedy (REE)", y != null ? `${id(Calc.caldwell(w, y), 0)} kcal` : "isi umur");
       const r = D.rdaCalc();
@@ -496,13 +500,13 @@ const SEC = {
   balance: { t: "Balance", c: "var(--indigo)", g: "Cairan",
     body: () => card("balance", "Balance per blok", "Balance = intake − (output + IWL)", "var(--indigo)",
       `<div class="row">${field("balIntake", "Intake", "cc")}${field("balHours", "Lama blok", "jam")}</div><div class="row">${field("balUrine", "Urine", "cc")}${field("balOther", "Output lain", "cc")}</div>`),
-    res() { const b = D.bal(); if (!b) return res("Balance", D.w() == null || D.tm() == null ? "isi berat badan & umur di bagian atas" : "isi intake & lama blok");
+    res() { if (D.tooOld()) return CHILD_ONLY; const b = D.bal(); if (!b) return res("Balance", D.w() == null || D.tm() == null ? "isi berat badan & umur di bagian atas" : "isi intake & lama blok");
       const h = parse(p.balHours); let s = p.balUrine.trim() ? "" : res("Urine kosong", "dihitung 0 cc — pastikan memang anuria", "warn");
       return s + res(`IWL ${id(h)} jam`, `${id(b.iwl)} cc`) + res("Total output (+ IWL)", `${id(b.out)} cc`) + res("Balance", `${signed(b.bal, 1)} cc`, b.bal > 0 ? "warn" : "ok")
         + res("Balance ÷ berat badan", `${signed(b.perKg, 2)} cc/kg`) + res(`Balance ÷ berat badan ÷ ${id(h)} jam`, `${signed(b.perKgH, 2)} cc/kg/jam`) + res("Diuresis", `${id(b.diuresis, 2)} cc/kg/jam`, b.diuresis < 1 ? "alert" : "ok"); } },
   intake: { t: "% Maintenance", c: "var(--blue)", g: "Cairan",
     body: () => card("intake", "Intake vs maintenance", "Semua jalur: infus + sonde + obat", "var(--blue)", field("intakePerHour", "Total intake", "cc/jam")),
-    res() { const w = D.w(), i = parse(p.intakePerHour); if (w == null || i == null) return ""; const pct = i / (Calc.hs(w) / 24) * 100;
+    res() { const w = D.w(), i = parse(p.intakePerHour); if (D.tooOld()) return CHILD_ONLY; if (w == null || i == null) return ""; const pct = i / (D.hs() / 24) * 100;
       return res("Dari maintenance", `${id(pct, 0)}%`, pct > 100 ? "alert" : "ok"); } },
   gfr: { t: "GFR", c: "var(--yellow)", g: "Ginjal",
     body() { const m = D.tm(); const autoK = m == null ? 0.55 : Calc.defK(m, p.premature, p.male), k = p.schwartzK ?? autoK, ar = m == null ? null : Calc.gfrRow(m);
@@ -647,12 +651,12 @@ let cur = ARGS.get("section") || "kebutuhan"; if (!SEC[cur]) cur = "kebutuhan";
 
 /* ============ pencarian ============ */
 const FEAT = [
-  ["Holliday-Segar", "hs maintenance rumatan cairan kalori", "kebutuhan", () => D.w() != null && `${id(Calc.hs(D.w()), 0)} cc/hari · ${id(Calc.hs(D.w()) / 24)} cc/jam`],
+  ["Holliday-Segar", "hs maintenance rumatan cairan kalori", "kebutuhan", () => D.hs() != null && `${id(D.hs(), 0)} cc/hari · ${id(D.hs() / 24)} cc/jam`],
   ["Schofield", "schofield kalori kcal energi gizi", "kebutuhan", () => D.w() != null && D.years() != null && p.male != null && `${id(Calc.schofield(D.w(), D.years(), p.male), 0)} kcal`],
   ["Caldwell-Kennedy (REE)", "caldwell cadwell kennedy ree kalori", "kebutuhan", () => D.w() != null && D.years() != null && `${id(Calc.caldwell(D.w(), D.years()), 0)} kcal`],
   ["RDA × berat badan", "rda kalori kebutuhan gizi bb ideal", "kebutuhan", () => D.rdaCalc() && `${id(D.rdaCalc().kcal, 0)} kcal`],
   ["IWL", "iwl insensible water loss rssa neonatus", "kebutuhan", () => D.w() != null && D.tm() != null && `${id(Calc.iwlRate(D.tm(), D.neo()) * D.w(), 0)} cc/hari`],
-  ["Intake vs maintenance", "intake persen maintenance overload", "intake", () => { const w = D.w(), i = parse(p.intakePerHour); return w != null && i != null && `${id(i / (Calc.hs(w) / 24) * 100, 0)}%`; }],
+  ["Intake vs maintenance", "intake persen maintenance overload", "intake", () => { const hs = D.hs(), i = parse(p.intakePerHour); return hs != null && i != null && `${id(i / (hs / 24) * 100, 0)}%`; }],
   ["Balance cairan", "balance kumulatif output iwl", "balance", () => D.bal() && `${signed(D.bal().bal, 1)} cc`],
   ["Diuresis / urine output", "diuresis urine output uo", "balance", () => D.bal() && `${id(D.bal().diuresis, 2)} cc/kg/jam`],
   ["GFR (Schwartz) & pRIFLE", "gfr lfg schwartz kreatinin ginjal aki rifle bun ureum renal prerenal", "gfr", () => D.gfr() != null && `${id(D.gfr())} ml/min/1,73 m²`],
@@ -688,8 +692,8 @@ function renderGrid() {
 }
 function renderSection() { $("#section").innerHTML = SEC[cur].body(); refresh(); }
 function refresh() {
-  const w = D.w();
-  $("#hs").innerHTML = w != null ? `<b>${id(Calc.hs(w), 0)} cc/hari</b><span>Holliday-Segar · ${id(Calc.hs(w) / 24)} cc/jam</span>` : `<span>${p.weight ? "cek berat badan (kg)" : "isi berat badan untuk Holliday-Segar"}</span>`;
+  const hs = D.hs();
+  $("#hs").innerHTML = D.tooOld() ? `<span>Holliday-Segar: hanya umur 0–18 tahun</span>` : hs != null ? `<b>${id(hs, 0)} cc/hari</b><span>Holliday-Segar · ${id(hs / 24)} cc/jam</span>` : `<span>${p.weight ? "cek berat badan (kg)" : "isi berat badan untuk Holliday-Segar"}</span>`;
   $("#neo").innerHTML = D.tm() === 0 ? `<label class="chk"><input type="checkbox" data-bool="neonate" ${p.neonate ? "checked" : ""}> Neonatus</label>` : "";
   const l = D.level(), b = D.band();
   $("#status").style.background = `color-mix(in srgb, ${LV[l]} 16%, var(--card))`;
