@@ -326,6 +326,9 @@ Calc.ett = (m, w, neo) => {
   if (m < 24) return [3.5, 4, "1–2 tahun"];
   if (m >= 156) return null;
   const y = Math.floor(m / 12); return [y / 4 + 3.5, y / 4 + 4, `umur ${y} tahun`]; };
+// ETT dewasa: [ID terkecil, terbesar, kedalaman oral, kedalaman nasal] menurut jenis kelamin.
+Calc.ettAdult = male => male == null ? null : male ? [7.5, 8, 23, 26] : [7, 7.5, 21, 24];
+Calc.ettChula = h => .1 * h + 4; // kedalaman oral dewasa dari tinggi badan (cm)
 // Ukuran tersedia tiap 0,5: bila hasil di antara dua ukuran, tampilkan keduanya.
 Calc.ettSizes = v => { const lo = Math.floor(v * 2) / 2, hi = Math.ceil(v * 2) / 2; return lo === hi ? [lo] : [lo, hi]; };
 
@@ -408,6 +411,9 @@ const D = {
   years: () => { if (!p.ageYears.trim()) return p.ageMonths.trim() ? 0 : null; const v = parse(p.ageYears); return v != null && v <= 18 && Number.isInteger(v) ? v : null; },
   months: () => { if (!p.ageMonths.trim()) return 0; const v = parse(p.ageMonths); return v != null && v <= 11 && Number.isInteger(v) ? v : null; },
   tm: () => { const y = D.years(), m = D.months(); return y == null || m == null ? null : y * 12 + m; },
+  // Umur dewasa hanya dipakai ETT; kalkulator lain tetap 0–18 tahun.
+  over18: () => { const v = parse(p.ageYears); return v != null && Number.isInteger(v) && v > 18 && v <= 120; },
+  ettAge: () => D.over18() && D.months() != null ? parse(p.ageYears) * 12 + D.months() : D.tm(),
   neo: () => p.neonate && D.tm() === 0,
   band: () => { const m = D.tm(); return m == null ? null : Calc.band(m); },
   ageText: () => { const m = D.tm(); return m == null ? "–" : m < 12 ? `${m} bulan` : `${Math.floor(m / 12)} tahun ${m % 12} bulan`; },
@@ -437,7 +443,8 @@ const D = {
     const k = p.schwartzK ?? Calc.defK(m, p.premature, p.male); return Calc.schwartz(k, h, c); },
   warnings() { const o = [];
     if (p.weight && D.w() == null) o.push(`Berat badan ${p.weight} tidak masuk akal — isi dalam kg (0,3–150), bukan gram.`);
-    if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18. Bayi: isi di kotak bulan (misalnya 0 tahun 6 bulan).");
+    if (D.over18()) { if (cur !== "ett") o.push("Umur > 18 tahun hanya didukung di ETT — kalkulator lain memakai rumus anak (0–18 tahun)."); }
+    else if (p.ageYears && D.years() == null) o.push("Umur tahun harus bilangan bulat 0–18. Bayi: isi di kotak bulan (misalnya 0 tahun 6 bulan).");
     if (D.months() == null) o.push("Umur bulan harus bilangan bulat 0–11 (12 bulan = 1 tahun 0 bulan).");
     const s = parse(p.sbp), d = parse(p.dbp); if (s != null && d != null && d >= s) o.push(`Diastol (${id(d, 0)}) ≥ sistol (${id(s, 0)}) — cek ulang tekanan darah.`);
     return o; },
@@ -535,13 +542,18 @@ const SEC = {
         + `<p class="note">STABLE: observasi rutin · MONITOR: tanda vital kuning · ALERT: PAT 1 sisi abnormal · CRITICAL: tanda vital merah / PAT ≥ 2 sisi</p>`; } },
 };
 SEC.ett = { t: "ETT", c: "var(--teal)", g: "Jalan napas",
-  body: () => card("ett", "Ukuran & kedalaman ETT", "Diameter dalam (ID) dan batas bibir / hidung", "var(--teal)", field("ettId", "ID ETT yang dipakai (opsional)", "mm")),
-  res() { const m = D.tm(), w = D.w(), neo = D.neo(); let h = "";
+  body: () => card("ett", "Ukuran & kedalaman ETT", "Diameter dalam (ID) dan batas bibir / hidung", "var(--teal)", `<div class="row">${field("ettId", "ID ETT yang dipakai (opsional)", "mm")}${field("heightCm", "Tinggi badan (dewasa, opsional)", "cm")}</div>`),
+  res() { const m = D.ettAge(), w = D.w(), neo = D.neo(); let h = "";
     const mm = v => id(v, 2), sz = v => Calc.ettSizes(v).map(x => x.toFixed(1).replace(".", ",")).join(" / ") + " mm";
     const e = m == null ? null : Calc.ett(m, w, neo), y = m == null ? null : Math.floor(m / 12);
     if (m == null) h += `<p class="note">Isi umur di bagian atas.</p>`;
     else if (neo && w == null) h += res("ETT neonatus", "isi berat badan");
-    else if (!e) h += res("Umur > 12 tahun", "Di luar rumus anak — tentukan ukuran bersama DPJP", "warn");
+    else if (!e) { const a = Calc.ettAdult(p.male), hc = parse(p.heightCm);
+      if (m < 216) h += res("Umur 13–17 tahun", "Rujukan dewasa — hanya bila postur sudah dewasa, tentukan bersama DPJP", "warn");
+      if (!a) h += res("ETT dewasa", "pilih jenis kelamin");
+      else { const s = p.male ? "laki-laki" : "perempuan";
+        h += res(`Cuffed dewasa (${s})`, `${id(a[0])}–${id(a[1])} mm`) + res(`Kedalaman oral (${s})`, `${a[2]} cm di gigi seri`) + res(`Kedalaman nasal (${s})`, `${a[3]} cm di hidung`); }
+      if (p.heightCm.trim()) h += hc != null && hc >= 130 && hc <= 220 ? res("Kedalaman oral (Chula: 0,1 × TB + 4)", `${id(Calc.ettChula(hc))} cm di sudut mulut`) : res("Tinggi badan", "untuk rumus dewasa isi 130–220 cm", "alert"); }
     else { const f = y >= 2, line = (l, v, k) => res(l, f ? `${y}/4 + ${k} = ${mm(v)} → ${sz(v)}` : sz(v));
       if (e[0] != null) h += line(`Cuffed (${e[2]})`, e[0], "3,5");
       h += line(`Uncuffed (${e[2]})`, e[1], "4");
@@ -551,12 +563,12 @@ SEC.ett = { t: "ETT", c: "var(--teal)", g: "Jalan napas",
     const x = parse(p.ettId), ok = x != null && x >= 2 && x <= 10;
     if (p.ettId.trim() && !ok) h += res("ID ETT", "tidak masuk akal — isi dalam mm (2–10)", "alert");
     if (e && neo) h += res("Kedalaman oral (berat badan + 6)", `${id(w + 6)} cm di bibir`);
-    else if (ok) h += res("Kedalaman oral (3 × ID)", `3 × ${mm(x)} = ${id(3 * x)} cm di bibir`);
+    else if (ok && !(m >= 216)) h += res("Kedalaman oral (3 × ID)", `3 × ${mm(x)} = ${id(3 * x)} cm di bibir`);
     else if (e) { const list = v => Calc.ettSizes(v).map(q => id(3 * q)).join(" / ") + " cm";
       if (e[0] != null) h += res("Kedalaman oral cuffed (3 × ID)", list(e[0]));
       h += res("Kedalaman oral uncuffed (3 × ID)", list(e[1])); }
     if (e && y >= 2) h += res("Kedalaman oral (umur/2 + 12)", `${id(y / 2 + 12)} cm di bibir`) + res("Kedalaman nasal (umur/2 + 15)", `${id(y / 2 + 15)} cm di hidung`);
-    return h + `<p class="note">Umur dihitung tahun penuh. Siapkan juga ukuran 0,5 mm lebih kecil dan lebih besar. Hasil hanya perkiraan awal: konfirmasi posisi dengan kapnografi (EtCO₂), auskultasi dan rontgen dada. Acuan: PALS (umur), NRP (neonatus) — cocokkan dengan SOP unit.</p>`; } };
+    return h + `<p class="note">Umur dihitung tahun penuh. Siapkan juga ukuran 0,5 mm lebih kecil dan lebih besar. Hasil hanya perkiraan awal: konfirmasi posisi dengan kapnografi (EtCO₂), auskultasi dan rontgen dada. Acuan: PALS (umur), NRP (neonatus); dewasa ≥ 18 tahun: patokan umum jenis kelamin & rumus Chula — cocokkan dengan SOP unit.</p>`; } };
 const scoreSec = (key, t, c, g, title, sub, items, opts = {}) => SEC[key] = { t, c, g,
   body: () => card(key, title, sub, c, (opts.ind ? indic(opts.ind) : "") + (opts.seg ? seg(...opts.seg) : "") + scoreRows(key, items(), !!opts.choice).replaceAll("var(--c0)", c)),
   res() { const tot = opts.choice ? D.cheopsTotal() : D.total(p[key]); if (tot == null) return incomplete(p[key]);
@@ -648,7 +660,7 @@ const FEAT = [
   ["MAP", "map mean arterial pressure tekanan darah", "ttv", () => { const s = parse(p.sbp), d = parse(p.dbp); return s != null && d != null && d < s && `${id(Calc.map(s, d), 0)} mmHg`; }],
   ["PAT", "pat pediatric assessment triangle", "pat", () => D.patKey() && Calc.patImp[D.patKey()][1]],
   ["Eskalasi", "eskalasi lapor dpjp alert critical monitor stable", "eskalasi", () => Calc.statusLabel[D.level()]],
-  ["Ukuran & kedalaman ETT", "ett endotracheal tube intubasi cuffed uncuffed kedalaman jalan napas", "ett", () => { const m = D.tm(), e = m != null && Calc.ett(m, D.w(), D.neo()); return e && `ID ${id(e[0] ?? e[1], 2)} ${e[0] != null ? "cuffed" : "uncuffed"}`; }],
+  ["Ukuran & kedalaman ETT", "ett endotracheal tube intubasi dewasa cuffed uncuffed kedalaman jalan napas", "ett", () => { const m = D.ettAge(), e = m != null && Calc.ett(m, D.w(), D.neo()), a = m != null && m >= 216 && Calc.ettAdult(p.male); if (a) return `ID ${id(a[0])}–${id(a[1])} cuffed`; return e && `ID ${id(e[0] ?? e[1], 2)} ${e[0] != null ? "cuffed" : "uncuffed"}`; }],
   ["GCS", "gcs glasgow kesadaran", "gcs", () => D.total(p.gcs) != null && `${D.total(p.gcs)}/15 · ${p.gcs.join("/")}`],
   ["COMFORT-B", "comfort sedasi agitasi", "comfort", () => D.total(p.comfort) != null && `${D.total(p.comfort)}`],
   ["FLACC", "flacc nyeri pain", "flacc", () => D.total(p.flacc) != null && `${D.total(p.flacc)}/10`],
